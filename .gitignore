@@ -48,3 +48,6 @@ htmlcov/
 .claude/
 CLAUDE.md
 .gemini/
+docs/internal/
+*PHASE_0_PLAN*.md
+
