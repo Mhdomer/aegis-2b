@@ -105,26 +105,51 @@ else:
 
 ---
 
-## Quickstart
+## Installation & Distribution
 
+### Global Shell Command (via `pipx`):
 ```bash
-# 1. Clone repository
+# Install globally into your shell ($PATH)
+pipx install git+https://github.com/Mhdomer/aegis-2b.git
+
+# Or install from release wheel
+pipx install https://github.com/Mhdomer/aegis-2b/releases/download/v0.1.0/aegis_2b-0.1.0-py3-none-any.whl
+```
+
+### Local Development:
+```bash
+# Clone repository
 git clone https://github.com/Mhdomer/aegis-2b.git
 cd aegis-2b
 
-# 2. Run the interactive multi-scenario demonstration
-aegis demo
+# Install dependencies with uv
+uv sync
+```
 
-# 3. Launch the live interactive Web Operations Center
+---
+
+## Command Cockpit & Usage
+
+```bash
+# 1. Launch the k9s-style interactive full-screen Terminal Cockpit
+aegis top
+
+# 2. View the comprehensive Linux manual page
+aegis man
+
+# 3. Launch the browser Web Operations Center (http://127.0.0.1:8765)
 aegis ui
 
 # 4. Run the comparative LLM battle vs. prompt injection
 aegis demo --compare-llm
 
-# 5. Run the statistical benchmark suite
+# 5. Run the interactive Break-Glass prompt in terminal
+aegis demo --interactive --scenario blast_radius
+
+# 6. Run the statistical latency & cost benchmark suite
 aegis benchmark
 
-# 6. Run the unit test suite
+# 7. Run the unit test suite
 pytest tests/
 ```
 

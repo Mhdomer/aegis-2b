@@ -1,0 +1,75 @@
+name: Release & Distribute Aegis-2B
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    name: Test Suite (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Run Test Suite
+        run: uv run --python ${{ matrix.python-version }} pytest
+
+  build-and-release:
+    name: Build Wheel & Create GitHub Release
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Build Wheel & Sdist
+        run: uv build
+
+      - name: Publish GitHub Release Assets
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          files: dist/*
+          name: "Aegis-2B ${{ github.ref_name }}"
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+          body: |
+            ### 🛡️ Aegis-2B — Sub-Second Cloud Safety Circuit Breaker
+            **AWS Builder Center Hackathon (Strands Decider 2B Challenge)**
+
+            #### 🚀 Quick Install via pipx:
+            ```bash
+            pipx install https://github.com/Mhdomer/aegis-2b/releases/download/${{ github.ref_name }}/aegis_2b-0.1.0-py3-none-any.whl
+            ```
+
+            #### 💻 CLI Commands:
+            * `aegis top`: Launch interactive k9s-style full-screen terminal cockpit
+            * `aegis ui`: Launch browser Web Operations Center (`http://127.0.0.1:8765`)
+            * `aegis demo --compare-llm`: Head-to-head battle vs. adversarial prompt injection
+            * `aegis benchmark`: Statistical latency (P50/P90/P99) and token cost benchmarks
+            * `aegis man`: Comprehensive Unix/Linux manual page
