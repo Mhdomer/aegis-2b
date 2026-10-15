@@ -48,6 +48,11 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
             self.path = "/dashboard.html"
             return super().do_GET()
 
+        elif parsed.path == "/favicon.ico":
+            self.send_response(HTTPStatus.NO_CONTENT)
+            self.end_headers()
+            return
+
         elif parsed.path == "/api/status":
             self._send_json({
                 "status": "online",
@@ -290,8 +295,12 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
 
     def log_message(self, format, *args):
         # Silence routine static asset logs to keep terminal output clean
-        if "/api/" in args[0] or "500" in str(args):
-            sys.stderr.write(f"[Aegis-Server] {self.address_string()} - {format % args}\n")
+        try:
+            raw_msg = format % args
+        except Exception:
+            raw_msg = f"{format} - {args}"
+        if "/api/" in raw_msg or any(err in raw_msg for err in ("404", "500", "Error", "Exception")):
+            sys.stderr.write(f"[Aegis-Server] {self.address_string()} - {raw_msg}\n")
 
 
 def start_server(host: str = "127.0.0.1", port: int = 8765, open_browser: bool = False):
