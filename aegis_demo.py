@@ -109,6 +109,24 @@ def run_scenario(
     render_dispatcher_receipt(receipt)
     console.print("\n" + "=" * 80 + "\n")
 
+    # Sync with running Web Operations Center if active
+    _sync_with_web_ui(scenario_type, break_glass_token)
+
+
+def _sync_with_web_ui(scenario_type: str, break_glass_token: str = None):
+    try:
+        import urllib.request
+        endpoint = "http://127.0.0.1:8765/api/break-glass" if break_glass_token else "http://127.0.0.1:8765/api/evaluate"
+        payload = {"scenario": scenario_type} if not break_glass_token else {"scenario": scenario_type, "token": break_glass_token, "operator": "sec-ops-admin"}
+        req = urllib.request.Request(
+            endpoint,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+        )
+        urllib.request.urlopen(req, timeout=0.25)
+    except Exception:
+        pass
+
 
 def run_comparative_attack_demo():
     """
@@ -159,6 +177,7 @@ def run_comparative_attack_demo():
     aegis_table.add_row("Circuit Breaker Decision", "[bold white on red] HALTED & GATED [/bold white on red] (Confidence: 94.2%)")
     aegis_table.add_row("Cloud Impact", "[bold white on green] 🛡️ ZERO MUTATION: Production VPC 100% Safe & Intact! [/bold white on green]")
     console.print(Panel(aegis_table, title="[bold green]Aegis-2B: INSTANT CONTAINMENT[/bold green]", border_style="green"))
+    _sync_with_web_ui("adversarial")
 
 
 def main(scenario: str = "all", interactive: bool = False, compare_llm: bool = False):

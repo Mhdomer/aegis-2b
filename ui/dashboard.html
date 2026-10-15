@@ -1683,10 +1683,36 @@
       }
     }
 
+    // Live Event Polling (Syncs with CLI runs)
+    let lastSeenEventId = 0;
+
+    async function pollLiveEvents() {
+      if (!isServerConnected) return;
+      try {
+        const res = await fetch("/api/latest-event");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.event_id && data.event_id > lastSeenEventId) {
+            lastSeenEventId = data.event_id;
+            if (data.event && data.event.scenario) {
+              const scenarioNum = data.event.scenario === "benign" ? 1 : (data.event.scenario === "adversarial" ? 2 : 3);
+              document.querySelectorAll(".scenario-btn").forEach(b => b.classList.remove("active"));
+              const btn = document.getElementById(`btn-scen-${scenarioNum}`);
+              if (btn) btn.classList.add("active");
+              handleExecutionResult(data.event.scenario, data.event);
+            }
+          }
+        }
+      } catch (err) {
+        // Silent catch for background polling
+      }
+    }
+
     // Initialize on Page Load
     window.addEventListener("DOMContentLoaded", () => {
       checkServerStatus();
       logTerm("READY", "green", "Dashboard online. Click any scenario button above to trigger the live gate.");
+      setInterval(pollLiveEvents, 1000);
     });
   </script>
 </body>

@@ -30,6 +30,8 @@ FIXTURES_DIR = PROJECT_ROOT / "scenarios" / "fixtures"
 # Global singleton dispatcher preserving simulated cloud state
 dispatcher_instance = AWSActionDispatcher()
 guardrail_instance = DeciderCloudGuardrail(risk_threshold=0.85, simulate_local_latency=True)
+latest_event_id = 0
+latest_event_data = None
 
 
 class AegisAPIHandler(SimpleHTTPRequestHandler):
@@ -52,6 +54,12 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
             self.send_response(HTTPStatus.NO_CONTENT)
             self.end_headers()
             return
+
+        elif parsed.path == "/api/latest-event":
+            self._send_json({
+                "event_id": latest_event_id,
+                "event": latest_event_data,
+            })
 
         elif parsed.path == "/api/status":
             self._send_json({
@@ -164,7 +172,7 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
         # 2. Dispatch attempt via AWSActionDispatcher
         receipt = dispatcher_instance.dispatch(state, decider_res)
 
-        return {
+        res_payload = {
             "scenario": scenario_id,
             "title": scen["title"],
             "finding": scen["finding"],
@@ -194,6 +202,11 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
             },
         }
 
+        global latest_event_id, latest_event_data
+        latest_event_id += 1
+        latest_event_data = res_payload
+        return res_payload
+
     def _handle_break_glass(self, scenario_id: str, token: str, operator: str) -> Dict[str, Any]:
         scenarios = self._load_scenarios()
         scen = scenarios.get(scenario_id, scenarios["blast_radius"])
@@ -219,7 +232,7 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
 
         is_authorized = (receipt.execution_status == "OVERRIDDEN_BREAK_GLASS")
 
-        return {
+        res_payload = {
             "scenario": scenario_id,
             "token_submitted": token,
             "token_valid": verify_break_glass_token(token),
@@ -237,6 +250,11 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
                 "route_tables": dispatcher_instance._simulated_state["route_tables"],
             },
         }
+
+        global latest_event_id, latest_event_data
+        latest_event_id += 1
+        latest_event_data = res_payload
+        return res_payload
 
     def _reset_simulated_cloud(self):
         global dispatcher_instance
