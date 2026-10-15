@@ -42,7 +42,9 @@ def run_scenario(
         dispatcher = AWSActionDispatcher()
 
 
-    fixtures_dir = Path(__file__).parent / "scenarios" / "fixtures"
+    fixtures_dir = Path(__file__).resolve().parent / "scenarios" / "fixtures"
+    if not fixtures_dir.exists():
+        fixtures_dir = Path(__file__).resolve().parent.parent / "scenarios" / "fixtures"
 
     if scenario_type == "benign":
         fixture_path = fixtures_dir / "benign_ssh_finding.json"

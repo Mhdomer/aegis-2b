@@ -75,6 +75,20 @@ def main():
         help="Do not automatically launch web browser",
     )
 
+    # Command: top / dashboard (k9s-style Cockpit)
+    subparsers.add_parser(
+        "top",
+        aliases=["dashboard"],
+        help="Launch full-screen k9s-style interactive Terminal Cockpit",
+    )
+
+    # Command: man (Linux User's Manual)
+    subparsers.add_parser(
+        "man",
+        aliases=["manual"],
+        help="Display comprehensive Unix/Linux manual page",
+    )
+
     args = parser.parse_args()
 
     # Default action if no sub-command passed: run full demo
@@ -92,6 +106,14 @@ def main():
     elif args.command == "ui":
         from aegis.server import start_server
         start_server(port=args.port, open_browser=not args.no_browser)
+
+    elif args.command in ("top", "dashboard"):
+        from aegis.cockpit import run_cockpit
+        run_cockpit()
+
+    elif args.command in ("man", "manual"):
+        from aegis.manual import display_manual
+        display_manual()
 
     else:
         parser.print_help()
