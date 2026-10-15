@@ -112,14 +112,20 @@ else:
 git clone https://github.com/Mhdomer/aegis-2b.git
 cd aegis-2b
 
-# 2. Run the interactive dual-scenario demonstration
-python aegis_demo.py
+# 2. Run the interactive multi-scenario demonstration
+aegis demo
 
-# 3. Run the automated benchmark suite
-python scripts/benchmark.py
+# 3. Launch the live interactive Web Operations Center
+aegis ui
 
-# 4. Run the unit test suite
-python -m pytest tests/
+# 4. Run the comparative LLM battle vs. prompt injection
+aegis demo --compare-llm
+
+# 5. Run the statistical benchmark suite
+aegis benchmark
+
+# 6. Run the unit test suite
+pytest tests/
 ```
 
 ---
