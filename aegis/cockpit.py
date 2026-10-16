@@ -1,8 +1,8 @@
 """
 Aegis-2B — Interactive Terminal Cockpit
-A k9s-style full-screen terminal operations dashboard for autonomous cloud safety.
+A full-screen terminal operations dashboard for autonomous AWS cloud safety.
 Features arrow-key navigation (↑/↓/j/k), resource inspection ([Enter]/[d]),
-multi-tab views (Resources, Live Logs, Cluster Topology), and live hotkeys.
+multi-tab views (AWS Resources, CloudWatch Logs, VPC Topology), and live hotkeys.
 """
 
 import datetime
@@ -82,59 +82,52 @@ class AegisCockpit:
 
         return [
             {
-                "id": "sg-0123456789",
-                "name": "app-bastion",
-                "type": "SecurityGroup",
-                "arn": "arn:aws:ec2:us-east-1:111122223333:security-group/sg-0123456789",
-                "status": "● Port 22: OPEN" if has_22 else "✔ Port 22: CLOSED",
-                "status_style": "bold red" if has_22 else "bold green",
-                "details": "Bastion Ingress SG. Port 22 SSH (0.0.0.0/0) currently exposed." if has_22 else "Bastion Ingress SG. Port 22 SSH revoked & isolated.",
-                "rules": "Port 22/tcp (0.0.0.0/0)" if has_22 else "None (All ingress blocked)",
-                "threat": "UnauthorizedAccess:EC2/SSHBruteForce (HIGH)" if has_22 else "None (Mitigated)",
+                "id": "i-0prod-bastion",
+                "name": "sg-0123456789",
+                "role": "EC2 Instance",
+                "status": "▲ Port 22 Open" if has_22 else "● In-Service",
+                "status_style": "bold yellow" if has_22 else "bold green",
+                "policy": "Auto-Remediation",
+                "finding": "Port 22/tcp (0.0.0.0/0) Exposed" if has_22 else "Port 22 Revoked (Safe)",
+                "details": "Bastion ingress security group. SSH exposed to public internet." if has_22 else "Bastion security group. Port 22 revoked and isolated.",
+                "rules": "Port 22/tcp (0.0.0.0/0)" if has_22 else "None (Ingress blocked)",
+                "threat": "UnauthorizedAccess:EC2/SSHBruteForce" if has_22 else "None (Mitigated)",
             },
             {
-                "id": "sg-core-vpc-01",
-                "name": "core-db-sg",
-                "type": "SecurityGroup",
-                "arn": "arn:aws:ec2:us-east-1:111122223333:security-group/sg-core-vpc-01",
-                "status": "🛡️ PROTECTED (100%)",
+                "id": "aurora-pg-core-db",
+                "name": "sg-core-vpc-01",
+                "role": "RDS Aurora PG",
+                "status": "● Shielded",
                 "status_style": "bold green",
-                "details": "Core Production Database SG. Houses PostgreSQL 16 on port 5432.",
-                "rules": "Port 5432/tcp (10.0.0.0/16 VPC only)",
-                "threat": "Adversarial Prompt Injection Target (Protected by Aegis Shield)",
+                "policy": "Halt on Drop",
+                "finding": "PostgreSQL 16 (:5432) VPC Isolated",
+                "details": "Production Aurora PostgreSQL database. Houses clinical healthcare schema.",
+                "rules": "Port 5432/tcp (10.0.0.0/16 VPC CIDR only)",
+                "threat": "Prompt Injection Target (Protected by Strands Decider 2B)",
             },
             {
                 "id": "rtb-core-vpc-01",
-                "name": "main-rtb",
-                "type": "RouteTable",
-                "arn": "arn:aws:ec2:us-east-1:111122223333:route-table/rtb-core-vpc-01",
-                "status": f"✔ 0.0.0.0/0 -> {target}",
-                "status_style": "bold cyan",
-                "details": "VPC-wide Default Route Table. Directs outbound egress via Internet Gateway.",
+                "name": "vpc-0123456789",
+                "role": "VPC Route Table",
+                "status": "● Active",
+                "status_style": "bold green",
+                "policy": "SecOps MFA Gated",
+                "finding": f"0.0.0.0/0 -> {target}",
+                "details": "VPC-wide default route table. Directs outbound egress via Internet Gateway.",
                 "rules": f"0.0.0.0/0 -> {target}, 10.0.0.0/16 -> local",
-                "threat": "High Blast Radius Modification Vector (Gated by Break-Glass MFA)",
+                "threat": "High Blast Radius Modification Vector",
             },
             {
-                "id": "iam:role/aegis-remed-bot",
-                "name": "remediation-role",
-                "type": "IAMRole",
-                "arn": "arn:aws:iam::111122223333:role/aegis-remediation-bot",
-                "status": "✔ Least-Privilege Boto3",
-                "status_style": "dim green",
-                "details": "Scoped execution role for automated Boto3 AWS remediations.",
-                "rules": "ec2:RevokeSecurityGroupIngress, ec2:ReplaceRoute (Gated)",
-                "threat": "None (Credential Boundary Enforced)",
-            },
-            {
-                "id": "decider:strands-2b-engine",
-                "name": "strands-decider-2b",
-                "type": "DeciderEngine",
-                "arn": "local://model/strands-decider-2b:v1",
-                "status": "⚡ GATE ACTIVE (114.7ms)",
-                "status_style": "bold cyan",
-                "details": "Local 2B parameter decision model. Answers typed safety questions in sub-second time.",
-                "rules": "Fail-Closed Threshold: 0.85 (Enforced)",
-                "threat": "None (Mathematically immune to prompt injection)",
+                "id": "aegis-guardrail-gateway",
+                "name": "decider-2b",
+                "role": "In-VPC Guardrail",
+                "status": "● ARMED",
+                "status_style": "bold green",
+                "policy": "Fail-Closed (≥0.85)",
+                "finding": "114.7ms Local In-VPC Inference Gate",
+                "details": "In-VPC sub-second decision model. Evaluates tool calls before AWS Boto3 dispatch.",
+                "rules": "Fail-Closed Risk Threshold: 0.85",
+                "threat": "None (Mathematically bound)",
             },
         ]
 
@@ -314,147 +307,155 @@ class AegisCockpit:
     def render_header(self) -> Panel:
         now_utc = datetime.datetime.now(datetime.timezone.utc).strftime("%H:%M:%S UTC")
         t = Table.grid(expand=True)
-        t.add_column(ratio=6)
-        t.add_column(ratio=4, justify="right")
+        t.add_column(ratio=7)
+        t.add_column(ratio=3, justify="right")
 
         t.add_row(
             Text.from_markup(
-                "[bold cyan]🛡️  AEGIS-2B COCKPIT[/bold cyan] "
-                "[bold black on yellow] K9S NAVIGATOR [/bold black on yellow] "
-                "[bold green]● ARMED[/bold green]"
+                "[bold white]aws[/bold white] [bold yellow]AEGIS-2B[/bold yellow] "
+                "[dim]│[/dim] [white]Region: us-east-1[/white] "
+                "[dim]│[/dim] [white]VPC: vpc-0123456789[/white] "
+                "[dim]│[/dim] [bold green]● Active (114.7ms Gate)[/bold green]"
             ),
-            Text.from_markup(f"[dim]Acct: 111122223333 │ {now_utc}[/dim]"),
+            Text.from_markup(f"[dim]Account: 111122223333 │ {now_utc}[/dim]"),
         )
-        return Panel(t, border_style="cyan", box=box.ROUNDED)
+        return Panel(t, border_style="dim", box=box.SQUARE)
 
     def render_tab_bar(self) -> Panel:
         tabs = [
-            ("[1] ☁️ Cloud Resources", self.active_tab == 0),
-            ("[2] 📋 Live Telemetry Log", self.active_tab == 1),
-            ("[3] 🌐 Cluster Topology Map", self.active_tab == 2),
+            ("1: AWS Cloud Resources", self.active_tab == 0),
+            ("2: CloudWatch & Security Hub Audit Stream", self.active_tab == 1),
+            ("3: VPC Network Architecture", self.active_tab == 2),
         ]
         t = Table.grid(expand=True, padding=(0, 2))
         row = []
         for label, is_active in tabs:
             if is_active:
-                row.append(f"[bold black on cyan] {label} [/bold black on cyan]")
+                row.append(f"[bold white on blue] {label} [/bold white on blue]")
             else:
                 row.append(f"[dim white]{label}[/dim white]")
         t.add_row(*row)
-        return Panel(t, border_style="dim", box=box.ROUNDED)
+        return Panel(t, title="[dim]Views [Tab or ← / → to switch][/dim]", border_style="dim", box=box.SQUARE)
 
     def render_resources_table(self) -> Panel:
         resources = self.get_resources_list()
         table = Table(box=box.SIMPLE, expand=True, padding=(0, 1), show_header=True)
-        table.add_column("Sel", width=3, justify="center")
-        table.add_column("Resource", style="bold white", no_wrap=True)
-        table.add_column("Type", style="dim", width=14, no_wrap=True)
-        table.add_column("Security Posture", no_wrap=True)
+        table.add_column(" ", width=2, justify="center")
+        table.add_column("AWS Resource", no_wrap=True)
+        table.add_column("Service / Type", width=18, no_wrap=True)
+        table.add_column("Security Posture", width=18, no_wrap=True)
+        table.add_column("Aegis-2B Policy / Finding", no_wrap=True)
 
         for idx, res in enumerate(resources):
             is_sel = (idx == self.selected_index)
-            cursor = "[bold cyan]▶[/bold cyan]" if is_sel else " "
-            r_label = f"[bold cyan]{res['id']} ({res['name']})[/bold cyan]" if is_sel else f"{res['id']} ({res['name']})"
-            r_type = f"[bold cyan]{res['type']}[/bold cyan]" if is_sel else res['type']
-            r_status = Text(res["status"], style=res["status_style"])
+            if is_sel:
+                cursor = "[bold white]>[/bold white]"
+                r_label = f"[bold white on navy_blue]{res['id']}[/bold white on navy_blue]"
+                r_role = f"[dim on navy_blue]{res['role']}[/dim on navy_blue]"
+                r_status = f"[{res['status_style']} on navy_blue]{res['status']}[/{res['status_style']} on navy_blue]"
+                r_finding = f"[white on navy_blue]{res['finding']}[/white on navy_blue]"
+                table.add_row(cursor, r_label, r_role, r_status, r_finding, style="bold white on navy_blue")
+            else:
+                cursor = " "
+                table.add_row(cursor, f"[white]{res['id']}[/white]", f"[dim]{res['role']}[/dim]", Text(res["status"], style=res["status_style"]), f"[dim]{res['finding']}[/dim]")
 
-            table.add_row(cursor, r_label, r_type, r_status)
-
-        title = "[bold white]☁️ Cloud Resources (Use ↑/↓ or j/k to navigate, [Enter] to inspect)[/bold white]"
-        return Panel(table, title=title, border_style="blue", box=box.ROUNDED)
+        title = "[bold white]AWS Protected Infrastructure (↑/↓ to navigate, [Enter] to inspect)[/bold white]"
+        return Panel(table, title=title, border_style="dim", box=box.SQUARE)
 
     def render_circuit_panel(self) -> Panel:
         t = Table.grid(expand=True, padding=(0, 1))
         t.add_column(style="dim white", no_wrap=True)
         t.add_column(justify="right", no_wrap=True)
 
-        t.add_row("Engine:", "[bold white]Strands Decider 2B[/bold white]")
-        t.add_row("Latency:", f"[bold cyan]{self.last_decision['latency_ms']:.1f} ms[/bold cyan]")
-        t.add_row("Confidence:", f"[bold green]{self.last_decision['confidence']:.1%}[/bold green]")
-        t.add_row("Fail-Closed:", "[bold yellow]≥ 0.85 (Enforced)[/bold yellow]")
-        t.add_row("Cost / 1k:", "[bold green]$0.00[/bold green]")
-        t.add_row("Last Action:", f"[bold white]{self.last_decision['proposed_tool']}[/bold white]")
-        t.add_row("Blast Radius:", f"[bold white]{self.last_decision['blast_radius']}[/bold white]")
+        t.add_row("Guardrail Engine:", "[bold white]Strands Decider 2B[/bold white]")
+        t.add_row("In-VPC Latency:", f"[bold white]{self.last_decision['latency_ms']:.1f} ms[/bold white]")
+        t.add_row("Decision Confidence:", f"[bold green]{self.last_decision['confidence']:.1%}[/bold green]")
+        t.add_row("Fail-Closed Boundary:", "[bold yellow]≥ 0.85 (Enforced)[/bold yellow]")
+        t.add_row("Token Cost / 1k:", "[bold green]$0.00[/bold green]")
+        t.add_row("Last Boto3 Proposal:", f"[white]{self.last_decision['proposed_tool']}[/white]")
+        t.add_row("Blast Radius Scope:", f"[white]{self.last_decision['blast_radius']}[/white]")
 
         dec = self.last_decision["decision"]
         if dec in ("PERMIT", "PERMIT_AUTO_REMEDIATION"):
-            dec_styled = "[bold black on green] PERMITTED [/bold black on green]"
+            dec_styled = "[bold black on green] PERMITTED TO BOTO3 [/bold black on green]"
         elif dec in ("ARMED", "BASELINE"):
-            dec_styled = "[bold black on cyan] READY / ARMED [/bold black on cyan]"
+            dec_styled = "[bold white on blue] ARMED & READY [/bold white on blue]"
         elif dec == "OVERRIDDEN":
             dec_styled = "[bold black on yellow] OVERRIDDEN (MFA) [/bold black on yellow]"
         else:
             dec_styled = "[bold white on red] HALTED & GATED [/bold white on red]"
 
-        t.add_row("Gate State:", dec_styled)
-        return Panel(t, title="[bold white]⚡ Circuit Telemetry[/bold white]", border_style="cyan", box=box.ROUNDED)
+        t.add_row("Circuit Gate:", dec_styled)
+        return Panel(t, title="[bold white]In-VPC Circuit Breaker Telemetry[/bold white]", border_style="dim", box=box.SQUARE)
 
     def render_resource_inspector(self) -> Panel:
         resources = self.get_resources_list()
         res = resources[self.selected_index]
 
         t = Table.grid(expand=True, padding=(0, 1))
-        t.add_column(width=16, style="bold dim white")
+        t.add_column(width=18, style="bold dim white")
         t.add_column(ratio=1)
 
-        t.add_row("Resource ARN:", f"[bold cyan]{res['arn']}[/bold cyan]")
-        t.add_row("Logical Name:", f"[bold white]{res['name']}[/bold white]")
-        t.add_row("Resource Type:", f"[bold yellow]{res['type']}[/bold yellow]")
+        t.add_row("AWS Resource ID:", f"[bold white]{res['id']}[/bold white]")
+        t.add_row("Security Group / VPC:", f"[dim]{res['name']}[/dim]")
+        t.add_row("AWS Service Type:", f"[white]{res['role']}[/white]")
         t.add_row("Security State:", Text(res['status'], style=res['status_style']))
-        t.add_row("Network Rules:", f"[white]{res['rules']}[/white]")
-        t.add_row("Active Threats:", f"[bold red]{res['threat']}[/bold red]")
-        t.add_row("Description:", f"[dim white]{res['details']}[/dim white]")
-        t.add_row("Fail-Closed Guard:", "[bold green]Protected by Strands Decider 2B (<115ms Gate)[/bold green]")
+        t.add_row("Guardrail Policy:", f"[bold green]{res['policy']}[/bold green]")
+        t.add_row("Network Ingress Rules:", f"[white]{res['rules']}[/white]")
+        t.add_row("GuardDuty Finding:", f"[bold red]{res['threat']}[/bold red]")
+        t.add_row("Resource Details:", f"[dim white]{res['details']}[/dim white]")
+        t.add_row("Fail-Closed Boundary:", "[bold green]Protected by Strands Decider 2B (<115ms Local In-VPC Gate)[/bold green]")
 
         return Panel(
             t,
-            title=f"[bold yellow]🔍 Resource Inspector: {res['id']} [Press ESC, q, or Enter to exit][/bold yellow]",
-            border_style="yellow",
-            box=box.ROUNDED,
+            title=f"[bold white]AWS Resource Inspector: {res['id']} [ESC or Enter to exit][/bold white]",
+            border_style="dim",
+            box=box.SQUARE,
         )
 
     def render_full_logs(self) -> Panel:
         t = Table(box=box.SIMPLE, expand=True, padding=(0, 1))
         t.add_column("Timestamp", width=12, style="dim")
-        t.add_column("Tag", width=12)
-        t.add_column("Operations Telemetry Event", ratio=1)
+        t.add_column("AWS Source", width=14)
+        t.add_column("CloudWatch / GuardDuty Event Message", ratio=1)
 
         for entry in self.logs:
+            tag_style = entry.get("style", "dim")
             t.add_row(
                 f"[{entry['time']}]",
-                f"[{entry['style']}][{entry['tag']}][/{entry['style']}]",
+                f"[{tag_style}]{entry['tag']}[/{tag_style}]",
                 Text(entry["msg"], style="white"),
             )
-        return Panel(t, title="[bold white]📋 Live Operations Telemetry Log Stream[/bold white]", border_style="cyan", box=box.ROUNDED)
+        return Panel(t, title="[bold white]AWS CloudWatch & Security Hub Audit Stream[/bold white]", border_style="dim", box=box.SQUARE)
 
     def render_cluster_map(self) -> Panel:
         resources = self.get_resources_list()
-        sg1_status = resources[0]["status"]
-        sg2_status = resources[1]["status"]
+        b_status = resources[0]["status"]
+        db_status = resources[1]["status"]
         rt_status = resources[2]["status"]
 
         ascii_diagram = f"""
-  [bold cyan]VPC: vpc-0123456789 (10.0.0.0/16) │ Region: us-east-1[/bold cyan]
-  ┌────────────────────────────────────────────────────────────────────────────────────────┐
-  │ [dim]Internet Gateway: igw-core-01[/dim] ──▶ [bold yellow]Default Route: {rt_status}[/bold yellow]               │
-  │                                                                                        │
-  │  [bold white]Public Subnet (10.0.1.0/24)[/bold white]             [bold white]Private Subnet (10.0.2.0/24)[/bold white]                  │
-  │  ┌───────────────────────────────┐     ┌────────────────────────────────────────┐      │
-  │  │ [bold white]Bastion Node: i-0prod-bastion[/bold white] │     │ [bold white]Database Node: i-0prod-core-db[/bold white]          │      │
-  │  │ IP: 10.0.1.15                 │     │ IP: 10.0.2.40                          │      │
-  │  │ SG: sg-0123456789             │     │ SG: sg-core-vpc-01                     │      │
-  │  │ State: {sg1_status:<22} │     │ State: {sg2_status:<30}  │      │
-  │  └───────────────┬───────────────┘     └───────────────────▲────────────────────┘      │
-  │                  │                                         │                            │
-  │                  └──────────▶ [bold green]Strands Decider 2B[/bold green] ────────┘                            │
-  │                               [dim]Sub-Second Circuit Breaker (114.7ms)[/dim]                    │
-  └────────────────────────────────────────────────────────────────────────────────────────┘
+  [bold white]AWS VPC Topology: vpc-0123456789 (10.0.0.0/16) │ Region: us-east-1[/bold white]
+  ──────────────────────────────────────────────────────────────────────────────────────────
+  Internet Gateway (igw-core-01) ──▶ Default Route: [bold yellow]{rt_status}[/bold yellow]
+  
+  [white]Public Subnet (10.0.1.0/24)[/white]             [white]Private Subnet (10.0.2.0/24)[/white]
+  ┌──────────────────────────────┐       ┌──────────────────────────────┐
+  │ [bold white]EC2: i-0prod-bastion[/bold white]           │       │ [bold white]RDS: aurora-pg-core-db[/bold white]         │
+  │ IP: 10.0.1.15                │       │ IP: 10.0.2.40                │
+  │ SG: sg-0123456789            │       │ SG: sg-core-vpc-01           │
+  │ Posture: {b_status:<19} │       │ Posture: {db_status:<19} │
+  └──────────────┬───────────────┘       └──────────────▲───────────────┘
+                 │                                      │
+                 └──────────▶ [bold green]Strands Decider 2B Gate[/bold green] ──┘
+                              [dim]In-VPC Sub-Second Circuit Breaker (114.7ms)[/dim]
+  ──────────────────────────────────────────────────────────────────────────────────────────
         """
         return Panel(
             Text.from_markup(ascii_diagram),
-            title="[bold white]🌐 Kubernetes / VPC Cluster Architecture Topology[/bold white]",
-            border_style="green",
-            box=box.ROUNDED,
+            title="[bold white]VPC Network Architecture Topology Map[/bold white]",
+            border_style="dim",
+            box=box.SQUARE,
         )
 
     def render_footer(self) -> Panel:
@@ -467,61 +468,65 @@ class AegisCockpit:
         for entry in show_logs:
             log_table.add_row(
                 f"[{entry['time']}]",
-                f"[{entry['style']}][{entry['tag']}][/{entry['style']}]",
+                f"[{entry['style']}]{entry['tag']}[/{entry['style']}]",
                 Text(entry["msg"], style="white", overflow="ellipsis"),
             )
 
         keybinds = (
-            "[bold cyan][↑/↓][/bold cyan] Select  "
-            "[bold yellow][Enter][/bold yellow] Inspect  "
-            "[bold white on blue] [1] Benign [/bold white on blue] "
-            "[bold white on red] [2] Attack [/bold white on red] "
-            "[bold white on yellow] [3] Blast [/bold white on yellow] "
-            "[bold black on yellow] [B] MFA [/bold black on yellow] "
-            "[bold white on bright_black] [R] Reset [/bold white on bright_black] "
-            "[bold black on cyan] [W] Web [/bold black on cyan] "
-            "[bold cyan][Tab][/bold cyan] Views  "
-            "[bold white on dark_red] [Q] Quit [/bold white on dark_red]"
+            "[bold white][↑/↓][/bold white] Navigate  "
+            "[bold white][Enter][/bold white] Inspect  "
+            "[bold white][Tab][/bold white] Views  "
+            "[bold green][1][/bold green] Remediate  "
+            "[bold red][2][/bold red] Attack Shield  "
+            "[bold yellow][3][/bold yellow] Route Gate  "
+            "[bold yellow][B][/bold yellow] MFA  "
+            "[bold white][R][/bold white] Reset  "
+            "[bold white][W][/bold white] Web UI  "
+            "[bold white][Q][/bold white] Quit"
         )
 
         t = Table.grid(expand=True)
         t.add_row(log_table)
         t.add_row(Text.from_markup(f"\n{keybinds}"))
-        return Panel(t, title="[bold white]💻 Navigation & Hotkeys[/bold white]", border_style="green", box=box.ROUNDED)
+        return Panel(t, title="[bold white]Navigation & Hotkeys[/bold white]", border_style="dim", box=box.SQUARE)
 
 
 def _read_normalized_key(fd: Optional[int]) -> Optional[str]:
-    """Reads keyboard input and normalizes arrow keys, Enter, Tab, and Esc."""
+    """Reads keyboard input directly from raw file descriptor without stdio buffering."""
     if sys.platform != "win32" and fd is not None:
-        rlist, _, _ = select.select([sys.stdin], [], [], 0.08)
+        rlist, _, _ = select.select([fd], [], [], 0.08)
         if not rlist:
             return None
-        ch = sys.stdin.read(1)
-        if ch == "\x1b":
-            # Check for escape sequence
-            r2, _, _ = select.select([sys.stdin], [], [], 0.02)
-            if r2:
-                seq = sys.stdin.read(2)
-                if seq in ("[A", "OA"):
-                    return "UP"
-                elif seq in ("[B", "OB"):
-                    return "DOWN"
-                elif seq in ("[C", "OC"):
-                    return "RIGHT"
-                elif seq in ("[D", "OD"):
-                    return "LEFT"
-                elif seq == "[5":
-                    sys.stdin.read(1)
-                    return "UP"
-                elif seq == "[6":
-                    sys.stdin.read(1)
-                    return "DOWN"
-            return "ESC"
-        if ch in ("\r", "\n"):
+        try:
+            raw = os.read(fd, 32)
+        except OSError:
+            return None
+        if not raw:
+            return None
+
+        # Arrow keys and ANSI sequences
+        if raw in (b"\x1b[A", b"\x1bOA"):
+            return "UP"
+        if raw in (b"\x1b[B", b"\x1bOB"):
+            return "DOWN"
+        if raw in (b"\x1b[C", b"\x1bOC"):
+            return "RIGHT"
+        if raw in (b"\x1b[D", b"\x1bOD"):
+            return "LEFT"
+        if raw in (b"\x1b[5~", b"\x1b[H"):
+            return "UP"
+        if raw in (b"\x1b[6~", b"\x1b[F"):
+            return "DOWN"
+        if raw in (b"\r", b"\n"):
             return "ENTER"
-        if ch == "\t":
+        if raw == b"\t":
             return "TAB"
-        return ch
+        if raw == b"\x1b":
+            return "ESC"
+        try:
+            return raw.decode("utf-8", errors="ignore")
+        except Exception:
+            return None
     else:
         import msvcrt
         if msvcrt.kbhit():
@@ -532,6 +537,10 @@ def _read_normalized_key(fd: Optional[int]) -> Optional[str]:
                     return "UP"
                 elif ch2 == b"P":
                     return "DOWN"
+                elif ch2 == b"K":
+                    return "LEFT"
+                elif ch2 == b"M":
+                    return "RIGHT"
             elif ch in (b"\r", b"\n"):
                 return "ENTER"
             elif ch == b"\t":
@@ -575,7 +584,7 @@ def run_cockpit():
 
                     # Modal Inspection Dismissal
                     if cockpit.inspecting:
-                        if key in ("ESC", "ENTER") or k in ("q", "d", "x"):
+                        if key in ("ESC", "ENTER") or k in ("q", "d", "x", " "):
                             cockpit.inspecting = False
                             needs_redraw = True
                     else:
@@ -587,10 +596,16 @@ def run_cockpit():
                             max_idx = len(cockpit.get_resources_list()) - 1
                             cockpit.selected_index = min(max_idx, cockpit.selected_index + 1)
                             needs_redraw = True
-                        elif key in ("ENTER",) or k == "d":
+                        elif key in ("LEFT",) or k == "h":
+                            cockpit.active_tab = (cockpit.active_tab - 1) % 3
+                            needs_redraw = True
+                        elif key in ("RIGHT",) or k == "l":
+                            cockpit.active_tab = (cockpit.active_tab + 1) % 3
+                            needs_redraw = True
+                        elif key in ("ENTER",) or k in ("d", " "):
                             cockpit.inspecting = True
                             needs_redraw = True
-                        elif key in ("TAB",):
+                        elif key in ("TAB",) or k == "t":
                             cockpit.active_tab = (cockpit.active_tab + 1) % 3
                             needs_redraw = True
                         elif k in ("q", "\x03"):

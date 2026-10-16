@@ -128,29 +128,32 @@ uv sync
 
 ---
 
-## Command Cockpit & Usage
+## Command Line Interface & Usage
 
 ```bash
-# 1. Launch the k9s-style interactive full-screen Terminal Cockpit
+# 1. Inspect live cloud infrastructure posture and security state
+aegis scan
+
+# 2. Intercept & evaluate an action in ~115ms (CI/CD gate: exits 0 if permitted, 1 if blocked)
+aegis protect --tool delete_security_group --params '{"GroupId":"sg-core"}' --destructive --enforce
+
+# 3. Pipe JSON tool proposals from scripts or agents
+echo '{"tool":"revoke_security_group_ingress","params":{"Port":22}}' | aegis protect --json --enforce
+
+# 4. Launch the in-VPC HTTP guardrail daemon for autonomous agent integration
+aegis serve --port 8765
+
+# 5. Launch the full-screen interactive AWS Terminal Cockpit
 aegis top
 
-# 2. View the comprehensive Linux manual page
-aegis man
-
-# 3. Launch the browser Web Operations Center (http://127.0.0.1:8765)
+# 6. Launch the browser-based live visual demonstration & sandbox
 aegis ui
 
-# 4. Run the comparative LLM battle vs. prompt injection
-aegis demo --compare-llm
-
-# 5. Run the interactive Break-Glass prompt in terminal
-aegis demo --interactive --scenario blast_radius
-
-# 6. Run the statistical latency & cost benchmark suite
+# 7. Run the statistical latency & cost benchmark suite vs Bedrock
 aegis benchmark
 
-# 7. Run the unit test suite
-pytest tests/
+# 8. Run the unit test suite
+uv run pytest
 ```
 
 ---

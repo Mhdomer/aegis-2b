@@ -125,8 +125,11 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
             data = {}
 
         if parsed.path == "/api/evaluate":
-            scenario_id = data.get("scenario", "benign")
-            result_data = self._handle_evaluate(scenario_id)
+            if "tool" in data or "proposed_tool" in data:
+                result_data = self._handle_custom_evaluate(data)
+            else:
+                scenario_id = data.get("scenario", "benign")
+                result_data = self._handle_evaluate(scenario_id)
             self._send_json(result_data)
 
         elif parsed.path == "/api/break-glass":
@@ -180,6 +183,70 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
             "parameters": scen["params"],
             "reasoning": scen["reasoning"],
             "blast_radius": scen["blast_radius"],
+            "decision": decider_res.action.value,
+            "confidence": round(decider_res.confidence, 3),
+            "confidence_percent": f"{decider_res.confidence:.1%}",
+            "latency_ms": decider_res.latency_ms,
+            "reasoning_code": decider_res.reasoning_code,
+            "execution_status": receipt.execution_status,
+            "receipt": {
+                "timestamp": receipt.timestamp,
+                "target_arn": receipt.target_arn,
+                "proposed_tool": receipt.proposed_tool,
+                "parameters": receipt.parameters,
+                "guardrail_decision": receipt.guardrail_decision.value,
+                "circuit_confidence": receipt.circuit_confidence,
+                "execution_status": receipt.execution_status,
+                "details": receipt.details,
+            },
+            "cloud_state": {
+                "security_groups": dispatcher_instance._simulated_state["security_groups"],
+                "route_tables": dispatcher_instance._simulated_state["route_tables"],
+            },
+        }
+
+        global latest_event_id, latest_event_data
+        latest_event_id += 1
+        latest_event_data = res_payload
+        return res_payload
+
+    def _handle_custom_evaluate(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        tool_name = data.get("tool", data.get("proposed_tool", "custom_tool"))
+        params = data.get("params", data.get("parameters", {}))
+        if isinstance(params, str):
+            try:
+                params = json.loads(params)
+            except Exception:
+                params = {}
+        blast_str = data.get("blast_radius", "isolated")
+        blast = BlastRadius.VPC_WIDE if blast_str == "vpc_wide" else BlastRadius.ISOLATED
+        is_destr = bool(data.get("is_destructive", False))
+        arn = data.get("target_arn", data.get("arn", "arn:aws:ec2:us-east-1:111122223333:resource/custom-01"))
+        alert_source = data.get("alert_source", "custom.operator.input")
+        alert_title = data.get("alert_title", f"Custom Tool Evaluation: {tool_name}")
+        alert_desc = data.get("alert_desc", f"Custom action proposal evaluated live via Aegis-2B Playground.")
+
+        state = DeciderState(
+            alert_source=alert_source,
+            alert_severity=data.get("severity", "HIGH"),
+            target_arn=arn,
+            proposed_tool=tool_name,
+            tool_parameters=params,
+            blast_radius=blast,
+            is_destructive_action=is_destr,
+        )
+
+        decider_res = guardrail_instance.evaluate(state)
+        receipt = dispatcher_instance.dispatch(state, decider_res)
+
+        res_payload = {
+            "scenario": "custom",
+            "title": alert_title,
+            "description": alert_desc,
+            "proposed_tool": tool_name,
+            "parameters": params,
+            "blast_radius": blast.value,
+            "is_destructive": is_destr,
             "decision": decider_res.action.value,
             "confidence": round(decider_res.confidence, 3),
             "confidence_percent": f"{decider_res.confidence:.1%}",
