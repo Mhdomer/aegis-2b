@@ -45,9 +45,13 @@ htmlcov/
 # AI Assistant & Internal Workspace Metadata (STRICTLY IGNORED)
 # Never expose AI prompt scaffolding, chat contexts, or agent configs to public git
 .agents/
+.agents/HACKATHON_CONTEXT_MEMORY.md
+*CONTEXT_MEMORY*.md
+MEMORY.md
 .claude/
 CLAUDE.md
 .gemini/
 docs/internal/
 *PHASE_0_PLAN*.md
+
 

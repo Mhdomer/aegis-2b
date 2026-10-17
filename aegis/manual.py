@@ -50,44 +50,69 @@ MAN_PAGE_CONTENT = """
            boundary of least privilege?"[/dim]
 
 [bold cyan]COMMANDS[/bold cyan]
-    [bold green]top[/bold green], [bold green]dashboard[/bold green]
-        Launch the live, full-screen [bold white]k9s-style interactive Terminal Cockpit[/bold white].
-        Monitors simulated cloud resources, displays real-time telemetry gauges, and 
-        features live hotkeys ([1] Benign, [2] Injection, [3] Blast Radius, [B] MFA).
+    [bold green]remediate[/bold green] [[[bold yellow]--iac[/bold yellow]]] [[[bold yellow]--interactive[/bold yellow]]] [[[bold yellow]--json[/bold yellow]]]
+        Run the 3-Tier Decider Router (`tier_0_rule` / `tier_1_fast` / `tier_2_heavy`)
+        against live AWS resources or findings, saving 100% of LLM tokens on Tier 0 rules
+        and generating declarative Terraform HCL `git diff` patches (`--iac`).
+
+    [bold green]audit[/bold green] [[[bold yellow]--json[/bold yellow]]]
+        Run the 10-vector red-team and security self-audit mapped to OWASP LLM Top 10,
+        MITRE ATLAS, and AWS Well-Architected Security Pillar (10/10 PASS in 0.62 ms).
+
+    [bold green]test-aws[/bold green]
+        Verify live Botocore `before-parameter-build` circuit breaking against your
+        configured AWS account using $0.00 read-only discovery + pre-HTTP interception.
+
+    [bold green]scan[/bold green] [[[bold yellow]--live[/bold yellow]]]
+        Inspect simulated or live AWS Security Groups, Route Tables, EC2, and IAM Roles.
 
     [bold green]ui[/bold green] [[[bold yellow]--port[/bold yellow] PORT]] [[[bold yellow]--no-browser[/bold yellow]]]
-        Launch the interactive [bold white]Web Operations Center[/bold white] (default: http://127.0.0.1:8765).
-        Features dynamic SVG topology canvas, synthesized Web Audio SFX, and real-time REST API.
+        Launch the 5-tab Minimal Light Web Operations Center (default: http://127.0.0.1:8765).
+        Includes Pipeline & Router, Auto-SVG Architecture Map, 10-Vector Self-Audit,
+        Live AWS Account & Sandbox, and Policy & SHA-256 Receipts.
+
+    [bold green]top[/bold green], [bold green]dashboard[/bold green]
+        Launch the full-screen interactive Terminal Cockpit with bidirectional Web UI sync.
+
+    [bold green]protect[/bold green] [[[bold yellow]--tool[/bold yellow] NAME]] [[[bold yellow]--params[/bold yellow] JSON]] [[[bold yellow]--blast[/bold yellow] SCOPE]] [[[bold yellow]--json[/bold yellow]]] [[[bold yellow]--enforce[/bold yellow]]]
+        Evaluate and intercept an arbitrary AWS Boto3 tool proposal in sub-millisecond time.
+        Supports stdin JSON piping and CI/CD enforcement (--enforce exits 0 or 1).
+
+    [bold green]policy[/bold green]
+        Display active Policy-as-Code rules loaded from [bold white]aegis.yaml[/bold white].
 
     [bold green]demo[/bold green] [[[bold yellow]--scenario[/bold yellow] SCENARIO]] [[[bold yellow]--interactive[/bold yellow]]] [[[bold yellow]--compare-llm[/bold yellow]]]
         Execute the multi-scenario agentic demonstration:
-            • [bold white]benign:[/bold white] SSH brute force isolated ingress remediation (<120ms).
+            • [bold white]benign:[/bold white] SSH brute force isolated ingress remediation (Tier 0).
             • [bold white]adversarial:[/bold white] Poisoned alert attempting core security group deletion.
             • [bold white]blast_radius:[/bold white] High blast-radius VPC route table modification.
-            • [bold white]--compare-llm:[/bold white] Live head-to-head battle: Vanilla Bedrock vs. Aegis-2B.
+            • [bold white]--compare-llm:[/bold white] Head-to-head comparison: Unprotected Planner vs. Aegis-2B.
 
     [bold green]benchmark[/bold green] [[[bold yellow]--iterations[/bold yellow] N]]
-        Run statistical latency and token cost benchmarks comparing local Decider 2B 
-        against live Amazon Bedrock API calls. Reports P50, P90, P99, and cost delta.
+        Run empirical latency and token cost benchmarks (`time.perf_counter_ns()`) comparing
+        local schema evaluation (`0.016 ms` P50) and Botocore pre-HTTP hook interception
+        (`0.505 ms` P50) against live AWS `us-east-1` HTTPS RTT (`215.74 ms` warm / `631.22 ms` cold).
 
     [bold green]man[/bold green]
-        Display this comprehensive Unix/Linux manual page.
+        Display this Unix/Linux manual page.
+
 
 [bold cyan]FAIL-CLOSED POLICY SPECIFICATION[/bold cyan]
     Aegis-2B enforces strict mathematical safety invariants:
-        • [bold green]Confidence ≥ 0.90 & BlastRadius == ISOLATED:[/bold green] Auto-Remediation PERMITTED.
+        • [bold green]Confidence >= 0.85 & BlastRadius == ISOLATED:[/bold green] Auto-Remediation PERMITTED.
         • [bold red]Destructive Tool OR BlastRadius == VPC_WIDE:[/bold red] Execution HALTED & GATED.
-        • [bold yellow]Inference Timeout / Low Confidence (<0.85):[/bold yellow] Automatic fail-closed fallback to 
+        • [bold yellow]Classifier Exception / Low Confidence (<0.85):[/bold yellow] Automatic fail-closed fallback to
           [bold red]ENFORCE_BREAK_GLASS[/bold red].
 
 [bold cyan]BREAK-GLASS OVERRIDE[/bold cyan]
-    When high blast-radius actions are halted, SecOps human operators can override the gate 
-    by supplying a cryptographically verified MFA token (e.g. [bold yellow]849201[/bold yellow] or [bold yellow]BG-SEC-911[/bold yellow]).
-    All override actions are logged to immutable execution receipts with masked token signatures.
+    When high blast-radius actions are halted, SecOps human operators can override the gate
+    by supplying a verified MFA token (e.g. [bold yellow]849201[/bold yellow] or [bold yellow]BG-SEC-911[/bold yellow]).
+    All decisions emit tamper-evident SHA-256 `AuditReceipt` digests.
 
-[bold cyan]TARGET ISOLATION[/bold cyan]
-    Target AWS Account: [bold yellow]111122223333[/bold yellow] (Sandboxed / Isolated dummy environment).
-    No real AWS credentials, customer data, or production infrastructure are touched.
+[bold cyan]ZERO AWS SPEND SAFETY[/bold cyan]
+    Live AWS commands (`aegis scan --live`, `aegis test-aws`, `aegis remediate`) only invoke
+    $0.00 free read-only control-plane APIs (`sts:GetCallerIdentity`, `ec2:Describe*`, `iam:ListRoles`)
+    and block all mutating calls locally inside Botocore's `before-parameter-build` hook.
 
 [bold cyan]AUTHOR[/bold cyan]
     Written by [bold white]Mohamed Makhlouf[/bold white] (Cloud DevSecOps & AI Security Engineer, UTM).

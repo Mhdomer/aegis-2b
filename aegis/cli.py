@@ -19,42 +19,47 @@ if sys.platform == "win32":
 
 
 def print_welcome_overview():
-    """Prints a clear, educational overview of Aegis-2B and available commands."""
+    """Prints a clean overview of aegis-2b commands."""
     from rich.console import Console
-    from rich.panel import Panel
     from rich.table import Table
+    from rich import box
 
     console = Console()
     console.print()
+    console.print("[bold]aegis-2b[/bold] — local boto3 safety gate using Strands Decider 2B")
+    console.print("[dim]Intercepts destructive API calls, prompt injections, and wide blast-radius mutations before HTTP execution.[/dim]\n")
 
-    header_table = Table.grid(expand=True, padding=(0, 1))
-    header_table.add_row("[bold cyan]🛡️  AEGIS-2B[/bold cyan] — [bold white]Sub-Second Cloud Safety Circuit Breaker[/bold white]")
-    header_table.add_row("[dim]Autonomous AI Agent Guardrail powered by Strands Decider 2B (<115ms Local Gate)[/dim]")
-    header_table.add_row("[yellow]Intercepts prompt injections & high blast-radius mutations before they touch AWS Boto3.[/yellow]\n")
+    cmd_table = Table(box=box.SIMPLE, padding=(0, 2), show_header=True)
+    cmd_table.add_column("Command", style="bold", width=26)
+    cmd_table.add_column("Description")
 
-    cmd_table = Table(box=None, padding=(0, 2), show_header=True)
-    cmd_table.add_column("Command", style="bold cyan", width=26)
-    cmd_table.add_column("Purpose / Workflow", style="white")
+    cmd_table.add_row("aegis remediate [--iac]", "Tiered Decider 2B router (Tier 0/1/2) + Boto3 or Terraform git diff")
+    cmd_table.add_row("aegis test-aws", "Run live Botocore interception check against configured AWS credentials")
+    cmd_table.add_row("aegis audit", "Run 10-vector security & fail-closed self-audit")
+    cmd_table.add_row("aegis scan [--live]", "List VPC security groups, route tables, and IAM roles")
+    cmd_table.add_row("aegis protect --tool <op>", "Evaluate a proposed Boto3 operation from CLI or CI/CD")
+    cmd_table.add_row("aegis demo", "Run the 3 sample incident cases (SSH rule, prompt injection, route change)")
+    cmd_table.add_row("aegis ui", "Start local web console on http://127.0.0.1:8765")
+    cmd_table.add_row("aegis policy", "Show active policy rules from aegis.yaml")
+    cmd_table.add_row("aegis benchmark", "Measure local classifier latency vs remote LLM roundtrip")
+    cmd_table.add_row("aegis top", "Open terminal resource viewer")
+    cmd_table.add_row("aegis man", "Show manual page")
 
-    cmd_table.add_row("aegis demo", "Run guided incident defense scenarios (Benign, Attack, Blast Radius)")
-    cmd_table.add_row("aegis demo --compare-llm", "Run Head-to-Head battle: Traditional LLM vs. Aegis-2B Protected")
-    cmd_table.add_row("aegis protect --tool <name>", "Intercept & evaluate a proposed AWS tool call in real time (~115ms)")
-    cmd_table.add_row("aegis scan", "Inspect active cloud infrastructure posture and security state")
-    cmd_table.add_row("aegis top", "Interactive full-screen terminal operations cockpit (AWS resource navigator)")
-    cmd_table.add_row("aegis ui", "Launch browser-based Incident Defense Center (http://127.0.0.1:8765)")
-    cmd_table.add_row("aegis benchmark", "Run statistical latency & cost benchmarks vs Bedrock Claude 3.5")
-    cmd_table.add_row("aegis man", "Open comprehensive Unix/Linux engineering manual")
-
-    t = Table.grid(expand=True)
-    t.add_row(header_table)
-    t.add_row(cmd_table)
-    t.add_row("\n[dim]Run [bold white]aegis <command> --help[/bold white] for detailed options on any command.[/dim]")
-
-    console.print(Panel(t, title="[bold white]Aegis-2B Cloud Safety Tool[/bold white]", border_style="cyan"))
-    console.print()
+    console.print(cmd_table)
+    console.print("\n[dim]Run 'aegis <command> --help' for command flags.[/dim]\n")
 
 
-def run_protect_command(tool: Optional[str], arn: str, params_str: str, blast_str: str, is_destructive: bool, interactive: bool, as_json: bool = False, enforce: bool = False):
+def run_protect_command(
+    tool: Optional[str],
+    arn: str,
+    params_str: str,
+    blast_str: str,
+    is_destructive: bool,
+    interactive: bool,
+    as_json: bool = False,
+    enforce: bool = False,
+    notes: Optional[str] = None,
+):
     """Evaluates an arbitrary AWS tool call or alert in real time."""
     from rich.console import Console
     from rich.panel import Panel
@@ -78,6 +83,8 @@ def run_protect_command(tool: Optional[str], arn: str, params_str: str, blast_st
                     blast_str = payload["blast_radius"]
                 if "is_destructive" in payload:
                     is_destructive = payload["is_destructive"]
+                if "notes" in payload or "context_notes" in payload:
+                    notes = payload.get("notes", payload.get("context_notes", notes))
         except Exception:
             pass
 
@@ -96,7 +103,13 @@ def run_protect_command(tool: Optional[str], arn: str, params_str: str, blast_st
     except Exception:
         params = {}
 
-    blast = BlastRadius.VPC_WIDE if blast_str == "vpc_wide" else BlastRadius.ISOLATED
+    if blast_str == "account_wide":
+        blast = BlastRadius.ACCOUNT_WIDE
+    elif blast_str == "vpc_wide":
+        blast = BlastRadius.VPC_WIDE
+    else:
+        blast = BlastRadius.ISOLATED
+
     state = DeciderState(
         alert_source="cli.protect",
         alert_severity="HIGH",
@@ -105,11 +118,38 @@ def run_protect_command(tool: Optional[str], arn: str, params_str: str, blast_st
         tool_parameters=params,
         blast_radius=blast,
         is_destructive_action=is_destructive,
+        context_notes=notes,
     )
 
-    guardrail = DeciderCloudGuardrail(risk_threshold=0.85, simulate_local_latency=True)
+    guardrail = DeciderCloudGuardrail(risk_threshold=0.85, simulate_local_latency=False)
     res = guardrail.evaluate(state)
     is_permitted = (res.action == GuardrailAction.PERMIT_AUTO_REMEDIATION)
+
+    try:
+        from aegis.aws_live import broadcast_live_event_to_ui
+        broadcast_live_event_to_ui({
+            "scenario": "cli_protect",
+            "title": f"CLI Gate: {tool}",
+            "finding": {
+                "Title": f"CLI Protection Gate ({tool})",
+                "Description": notes or f"CLI evaluation via `aegis protect --tool {tool}`",
+            },
+            "proposed_tool": tool,
+            "parameters": params,
+            "blast_radius": blast.value,
+            "is_destructive": is_destructive,
+            "typed_question": DeciderCloudGuardrail.TYPED_QUESTION,
+            "decider_state": state.to_dict(),
+            "decision": res.action.value,
+            "confidence": round(res.confidence, 4),
+            "confidence_percent": f"{res.confidence:.1%}",
+            "latency_ms": res.latency_ms,
+            "reasoning_code": res.reasoning_code,
+            "raw_scores": res.raw_scores,
+            "execution_status": "EXECUTED" if is_permitted else "BLOCKED",
+        })
+    except Exception:
+        pass
 
     # Machine-readable JSON output for CI/CD pipelines
     if as_json:
@@ -125,6 +165,7 @@ def run_protect_command(tool: Optional[str], arn: str, params_str: str, blast_st
             "latency_ms": res.latency_ms,
             "confidence": res.confidence,
             "reasoning_code": res.reasoning_code,
+            "raw_scores": res.raw_scores,
         }
         print(json.dumps(out, indent=2))
         if enforce:
@@ -136,23 +177,24 @@ def run_protect_command(tool: Optional[str], arn: str, params_str: str, blast_st
     t.add_row("[bold white]Target ARN:[/bold white]", f"[dim]{arn}[/dim]")
     t.add_row("[bold white]Parameters:[/bold white]", f"[dim]{json.dumps(params)}[/dim]")
     t.add_row("[bold white]Blast Radius:[/bold white]", f"[yellow]{blast.value}[/yellow]")
-    t.add_row("[bold white]Destructive Action:[/bold white]", "[bold red]YES[/bold red]" if is_destructive else "[green]NO[/green]")
-    t.add_row("[bold white]Safety Engine:[/bold white]", "Strands Decider 2B (<115ms Local Gate)")
+    t.add_row("[bold white]Destructive Flag:[/bold white]", "[bold red]YES[/bold red]" if is_destructive else "[green]NO[/green]")
+    t.add_row("[bold white]Safety Engine:[/bold white]", "Strands Decider 2B (~115ms Local Gate)")
+    t.add_row("[bold white]Typed Question:[/bold white]", f"[italic dim]{DeciderCloudGuardrail.TYPED_QUESTION}[/italic dim]")
     t.add_row("[bold white]Evaluation Latency:[/bold white]", f"[bold cyan]{res.latency_ms:.1f} ms[/bold cyan]")
-    t.add_row("[bold white]Confidence Score:[/bold white]", f"[bold green]{res.confidence:.1%}[/bold green]")
+    t.add_row("[bold white]Confidence Score:[/bold white]", f"[bold green]{res.confidence:.1%}[/bold green] [dim](Threshold ≥ 85.0%)[/dim]")
 
     if is_permitted:
         verdict = "[bold black on green] PERMITTED [/bold black on green] (Safe for automated cloud execution)"
         border_style = "green"
-    elif is_destructive:
-        verdict = "[bold white on red] HALTED & INTERCEPTED [/bold white on red] (Destructive verb caught)"
+    elif is_destructive or res.raw_scores.get("destructive_mutation", 0) >= 0.5:
+        verdict = "[bold white on red] HALTED & INTERCEPTED [/bold white on red] (Destructive action blocked)"
         border_style = "red"
     else:
         verdict = "[bold black on yellow] GATED [/bold black on yellow] (High blast radius / MFA token required)"
         border_style = "yellow"
 
     t.add_row("[bold white]Circuit Verdict:[/bold white]", verdict)
-    t.add_row("[bold white]Reasoning Code:[/bold white]", f"[dim]{res.reasoning_code}[/dim]")
+    t.add_row("[bold white]Reasoning Code:[/bold white]", f"[bold white]{res.reasoning_code}[/bold white]")
 
     console.print()
     console.print(Panel(t, title="[bold white]🛡️ Aegis-2B Sub-Second Action Evaluation[/bold white]", border_style=border_style))
@@ -171,14 +213,32 @@ def run_protect_command(tool: Optional[str], arn: str, params_str: str, blast_st
         sys.exit(0 if is_permitted else 1)
 
 
-def run_scan_command():
-    """Inspects the active cloud environment and displays current posture."""
+def run_scan_command(
+    live: bool = False,
+    sandbox: bool = False,
+    profile: Optional[str] = None,
+    region: Optional[str] = None,
+):
+    """Inspects the active cloud environment (live AWS account if configured, or offline sandbox)."""
     from rich.console import Console
     from rich.panel import Panel
     from rich.table import Table
     from aegis.dispatcher import AWSActionDispatcher
+    from aegis.aws_live import get_live_aws_session, run_live_aws_scan
 
     console = Console()
+
+    # If --live was explicitly requested, or if --sandbox was NOT forced and live AWS credentials exist
+    if live:
+        run_live_aws_scan(profile=profile, region=region, console=console)
+        return
+
+    if not sandbox:
+        conn = get_live_aws_session(profile=profile, region=region)
+        if conn["connected"]:
+            run_live_aws_scan(profile=profile, region=region, console=console)
+            return
+
     dispatcher = AWSActionDispatcher()
     state = dispatcher._simulated_state
 
@@ -200,13 +260,50 @@ def run_scan_command():
     routes = rt.get("routes", rt.get("Routes", []))
     target = next((r.get("target", r.get("GatewayId")) for r in routes if r.get("cidr", r.get("DestinationCidrBlock")) == "0.0.0.0/0"), "NONE")
     table.add_row("rtb-core-vpc-01", "RouteTable", f"0.0.0.0/0 -> {target}", "⚠️ Gated (MFA Required)")
+    table.add_row("patient-records-prod", "S3 Bucket", "[bold green]AES256 Encrypted (Private)[/bold green]", "🛡️ Shielded (Halt on Delete)")
 
     footer = Table.grid(expand=True)
     footer.add_row(table)
-    footer.add_row("\n[dim]Target Account: 111122223333 │ Region: us-east-1 │ Decider 2B Gate: ARMED (Threshold ≥ 0.85)[/dim]")
+    footer.add_row(
+        "\n[dim]Mode: Offline Sandbox (Account 111122223333) │ Configure `aws configure` or pass `--live` to scan your real AWS account[/dim]"
+    )
 
     console.print()
-    console.print(Panel(footer, title="[bold white]☁️ Cloud Infrastructure Posture Scan[/bold white]", border_style="cyan"))
+    console.print(Panel(footer, title="[bold white]☁️ Cloud Infrastructure Posture Scan (Sandbox Fallback)[/bold white]", border_style="cyan"))
+    console.print()
+
+
+def run_policy_command():
+    """Displays the active Policy-as-Code configuration from aegis.yaml."""
+    from rich.console import Console
+    from rich.panel import Panel
+    from rich.table import Table
+    from patterns.guardrails import DeciderCloudGuardrail, load_policy_as_code
+
+    console = Console()
+    pol = load_policy_as_code()
+
+    t = Table(box=None, padding=(0, 2), show_header=True)
+    t.add_column("Policy Category", style="bold cyan", width=30)
+    t.add_column("Configured Rules / Boundaries", style="white")
+
+    t.add_row("Model & Gate Threshold", f"Strands Decider 2B (Fail-Closed Confidence ≥ {pol.get('risk_threshold', 0.85):.0%})")
+    t.add_row("Typed Question Contract", f"[italic]{DeciderCloudGuardrail.TYPED_QUESTION}[/italic]")
+    t.add_row(
+        "[bold green]1. Auto-Permit (Fast-Lane)[/bold green]",
+        ", ".join(sorted(a for a in pol.get("auto_permit", []) if ":" in a)) or "ec2:RevokeSecurityGroupIngress",
+    )
+    t.add_row(
+        "[bold red]2. Always Halt (Destructive)[/bold red]",
+        ", ".join(sorted(a for a in pol.get("always_halt", []) if ":" in a)) or "ec2:DeleteSecurityGroup",
+    )
+    t.add_row(
+        "[bold yellow]3. Require Break-Glass MFA[/bold yellow]",
+        ", ".join(sorted(a for a in pol.get("require_break_glass_mfa", []) if ":" in a)) or "ec2:ReplaceRoute",
+    )
+
+    console.print()
+    console.print(Panel(t, title="[bold white]📜 Aegis-2B Policy-as-Code (aegis.yaml)[/bold white]", border_style="cyan"))
     console.print()
 
 
@@ -251,14 +348,63 @@ def main():
     protect_parser.add_argument("--tool", type=str, help="AWS tool name (e.g. revoke_security_group_ingress, delete_security_group)")
     protect_parser.add_argument("--arn", type=str, default="arn:aws:ec2:us-east-1:111122223333:security-group/sg-0123456789", help="Target resource ARN")
     protect_parser.add_argument("--params", type=str, default="{}", help="Tool parameters as JSON string")
-    protect_parser.add_argument("--blast", choices=["isolated", "vpc_wide"], default="isolated", help="Blast radius boundary")
+    protect_parser.add_argument("--blast", choices=["isolated", "vpc_wide", "account_wide"], default="isolated", help="Blast radius boundary")
     protect_parser.add_argument("--destructive", action="store_true", help="Flag action as destructive mutation")
+    protect_parser.add_argument("--notes", type=str, default=None, help="Optional alert context or untrusted description")
     protect_parser.add_argument("--interactive", action="store_true", help="Prompt for Break-Glass MFA if action is gated")
     protect_parser.add_argument("--json", action="store_true", help="Output machine-readable JSON for CI/CD pipelines")
     protect_parser.add_argument("--enforce", action="store_true", help="Exit code 0 if permitted, exit code 1 if blocked (CI/CD gate)")
 
     # Command: scan
-    subparsers.add_parser("scan", help="Inspect active cloud infrastructure posture and security state")
+    scan_parser = subparsers.add_parser("scan", help="Inspect active cloud infrastructure posture and security state")
+    scan_parser.add_argument("--live", action="store_true", help="Force live AWS account scan using `aws configure` credentials")
+    scan_parser.add_argument("--sandbox", action="store_true", help="Force offline sandbox scan (Account 111122223333)")
+    scan_parser.add_argument("--profile", type=str, default=None, help="AWS CLI profile name from ~/.aws/credentials")
+    scan_parser.add_argument("--region", type=str, default=None, help="AWS region override (e.g. us-east-1, me-central-1)")
+
+    # Command: test-aws
+    test_aws_parser = subparsers.add_parser(
+        "test-aws",
+        help="Verify real Botocore circuit breaking against your live AWS account",
+    )
+    test_aws_parser.add_argument("--profile", type=str, default=None, help="AWS CLI profile name from ~/.aws/credentials")
+    test_aws_parser.add_argument("--region", type=str, default=None, help="AWS region override (e.g. us-east-1, me-central-1)")
+    test_aws_parser.add_argument(
+        "--create-test-sg",
+        action="store_true",
+        help="Create an ephemeral Security Group in your default VPC, remediate Port 22 live, block delete, and clean up ($0 cost)",
+    )
+    test_aws_parser.add_argument(
+        "--interactive",
+        action="store_true",
+        help="Prompt for Break-Glass MFA token during ephemeral Security Group cleanup",
+    )
+
+    # Command: policy
+    subparsers.add_parser("policy", help="Display active Policy-as-Code rules (aegis.yaml)")
+
+    # Command: remediate (3-Tier Router + Interactive [y/N/diff/iac] + Terraform Diff)
+    remediate_parser = subparsers.add_parser(
+        "remediate",
+        help="Run 3-tier Decider 2B routing & remediate findings via Boto3 or Terraform git diff",
+    )
+    remediate_parser.add_argument("--input", type=str, default=None, help="Path to Security Hub or Prowler JSON findings file")
+    remediate_parser.add_argument("--profile", type=str, default=None, help="AWS CLI profile name")
+    remediate_parser.add_argument("--region", type=str, default=None, help="AWS region override")
+    remediate_parser.add_argument("--interactive", action="store_true", help="Interactive [y/N/diff/iac] approval prompt for each finding")
+    remediate_parser.add_argument("--iac", action="store_true", help="Output declarative Terraform HCL git diffs to prevent state drift")
+    remediate_parser.add_argument("--json", action="store_true", help="Output structured JSON router schema")
+
+    # Command: audit (10-Vector Security Self-Audit)
+    audit_parser = subparsers.add_parser(
+        "audit",
+        help="Run 10-vector live red-team & security self-audit against Aegis-2B",
+    )
+    audit_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Output machine-readable JSON security audit scorecard",
+    )
 
     # Command: benchmark
     benchmark_parser = subparsers.add_parser("benchmark", help="Run the statistical latency and cost benchmark")
@@ -334,10 +480,47 @@ def main():
             interactive=args.interactive,
             as_json=args.json,
             enforce=args.enforce,
+            notes=args.notes,
         )
 
     elif args.command == "scan":
-        run_scan_command()
+        run_scan_command(
+            live=args.live,
+            sandbox=args.sandbox,
+            profile=args.profile,
+            region=args.region,
+        )
+
+    elif args.command == "test-aws":
+        from aegis.aws_live import run_live_aws_test
+        ok = run_live_aws_test(
+            profile=args.profile,
+            region=args.region,
+            create_ephemeral_sg=args.create_test_sg,
+            interactive=args.interactive,
+        )
+        if not ok:
+            sys.exit(1)
+
+    elif args.command == "policy":
+        run_policy_command()
+
+    elif args.command == "remediate":
+        from aegis.remediate import run_remediate_cli
+        run_remediate_cli(
+            input_path=args.input,
+            profile=args.profile,
+            region=args.region,
+            interactive=args.interactive,
+            show_iac=args.iac,
+            as_json=args.json,
+        )
+
+    elif args.command == "audit":
+        from aegis.security_audit import run_security_audit_cli
+        ok = run_security_audit_cli(as_json=args.json)
+        if not ok:
+            sys.exit(1)
 
     elif args.command == "benchmark":
         from scripts.benchmark import run_benchmark
@@ -365,3 +548,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
