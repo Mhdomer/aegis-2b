@@ -7,13 +7,21 @@ from patterns.guardrails.schemas import (
     DeciderResult,
     DeciderState,
     GuardrailAction,
+    GuardrailBlockedError,
 )
-from patterns.guardrails.decider_cloud_guardrail import DeciderCloudGuardrail
+from patterns.guardrails.decider_cloud_guardrail import (
+    DeciderCloudGuardrail,
+    load_policy_as_code,
+)
 
 __all__ = [
     "BlastRadius",
     "DeciderResult",
     "DeciderState",
     "GuardrailAction",
+    "GuardrailBlockedError",
     "DeciderCloudGuardrail",
+    "load_policy_as_code",
 ]
+
+
