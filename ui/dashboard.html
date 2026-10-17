@@ -1505,6 +1505,10 @@
                 <pre class="code-block">uvx aegis-2b audit</pre>
               </div>
               <div>
+                <div class="kv-label">Run pre-built container in CI/CD (Docker)</div>
+                <pre class="code-block">docker run --rm ghcr.io/mhdomer/aegis-2b:latest audit</pre>
+              </div>
+              <div>
                 <div class="kv-label">Protect any Boto3 client in Python</div>
                 <pre class="code-block">from aegis import DeciderCloudGuardrail
 ec2 = DeciderCloudGuardrail().protect_boto3_client(boto3.client("ec2"))</pre>

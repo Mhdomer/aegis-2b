@@ -31,6 +31,7 @@ You can evaluate both the **Web Operations Center** and the **`aegis` CLI** dire
 | **1. Live Browser Web Console + CLI Terminal** *(Instant, Zero Install)* | [**mhdomer.github.io/aegis-2b**](https://mhdomer.github.io/aegis-2b/) | Full 6-tab Operations Center (`Incident Defense`, **`CLI Terminal`**, `Architecture & Cost`, `Live Cloud`, `10-Vector Self-Audit`, and `Policy & Custom Test`) running in-browser with real `performance.now()` timing and SHA-256 audit receipts. |
 | **2. 1-Click GitHub Codespaces** *(Real Linux Shell in Browser)* | [**codespaces.new/Mhdomer/aegis-2b**](https://codespaces.new/Mhdomer/aegis-2b) | Boots an isolated Linux VM in your browser with `aegis` pre-installed. Run `aegis demo`, `aegis remediate --iac`, `aegis audit`, `aegis top`, and `pytest -v` in a real terminal. |
 | **3. Official Python Package (`v0.2.1`)** *(PyPI / Isolated `uvx` / `pip`)* | `pip install aegis-2b` or `uvx aegis-2b audit` | Available on PyPI via automated GitHub Actions OIDC Trusted Publishing. Audited via **Bandit AST**, **Ruff SAST (`flake8-bandit`)**, and **SonarQube** in GitHub Actions CI (`0` issues, `4` standard dependencies: `boto3`, `pydantic`, `pyyaml`, `rich`). |
+| **4. Pre-built OCI Container (`ghcr.io`)** *(Docker / CI/CD Pipelines)* | `docker run --rm ghcr.io/mhdomer/aegis-2b:latest audit` | Hardened, non-root multi-arch container (`linux/amd64`, `linux/arm64`) for GitHub Actions, GitLab CI, and containerized agent runtimes. |
 
 ---
 
@@ -192,6 +193,53 @@ uv tool install aegis-2b
 
 # Option D: Install official signed release wheel (v0.2.1)
 pip install https://github.com/Mhdomer/aegis-2b/releases/download/v0.2.1/aegis_2b-0.2.1-py3-none-any.whl
+```
+
+### 4. Pre-built Docker Container (CI/CD Pipelines)
+
+For teams running security checks inside CI/CD pipelines (e.g., GitHub Actions, GitLab CI, AWS CodeBuild) without local Python setup:
+
+```bash
+# Run 10-vector security self-audit
+docker run --rm ghcr.io/mhdomer/aegis-2b:latest audit
+
+# Run 3-tier router and generate Terraform patch
+docker run --rm ghcr.io/mhdomer/aegis-2b:latest remediate --iac
+
+# Gate autonomous agent actions in CI/CD (exits with code 1 if blocked)
+docker run --rm -v $(pwd):/workspace ghcr.io/mhdomer/aegis-2b:latest protect \
+  --tool delete_security_group \
+  --arn arn:aws:ec2:us-east-1:111122223333:security-group/sg-core \
+  --blast vpc_wide \
+  --destructive \
+  --enforce
+
+# Launch Web Operations Center on port 8765
+docker run --rm -p 8765:8765 ghcr.io/mhdomer/aegis-2b:latest ui --host 0.0.0.0 --port 8765
+```
+
+#### GitHub Actions CI Example:
+```yaml
+- name: Gate Autonomous Agent Action
+  run: |
+    docker run --rm -v ${{ github.workspace }}:/workspace \
+      ghcr.io/mhdomer/aegis-2b:latest protect \
+      --alert /workspace/scenarios/fixtures/malicious_prompt_injection.json \
+      --enforce
+```
+
+#### GitLab CI Example:
+```yaml
+aegis-safety-circuit-breaker:
+  image: ghcr.io/mhdomer/aegis-2b:latest
+  script:
+    - aegis audit
+    - aegis remediate --iac
+```
+
+### 5. Drop-In Python SDK Library (`pip` / `uv add`)
+```bash
+pip install aegis-2b
 ```
 ```python
 import boto3
