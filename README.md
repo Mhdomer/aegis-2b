@@ -165,6 +165,19 @@ ec2.delete_security_group(GroupId="sg-core-vpc-01")  # Raises GuardrailBlockedEr
 
 You do **not** need to clone this repository to use Aegis-2B. Choose whichever workflow fits your environment:
 
+### Complete Distribution Matrix
+
+| Channel | Method | Use Case |
+|---|---|---|
+| **1. Web Console** | [`mhdomer.github.io/aegis-2b`](https://mhdomer.github.io/aegis-2b/) | Zero-install interactive browser test |
+| **2. Codespaces** | [`codespaces.new/Mhdomer/aegis-2b`](https://codespaces.new/Mhdomer/aegis-2b) | 1-click cloud VM with real Linux shell |
+| **3. PyPI Package** | `pip install aegis-2b` or `uvx aegis-2b audit` | Official package on PyPI |
+| **4. OCI Container** | `docker run --rm ghcr.io/mhdomer/aegis-2b:latest audit` | CI/CD pipelines & container runtimes |
+| **5. Debian Package** | `apt install ./aegis-2b_0.2.1_all.deb` | Ubuntu / Debian release asset |
+| **6. Homebrew** | `brew install Mhdomer/tap/aegis` | macOS / Linux brew tap |
+
+---
+
 ### 1. Official PyPI Package (`pip` or `uv`)
 ```bash
 pip install aegis-2b
@@ -180,7 +193,7 @@ uvx aegis-2b remediate --iac
 uvx aegis-2b ui
 ```
 
-### 3. Install Global CLI Binary (`pipx`, `brew`, or `uv tool`)
+### 3. Install Global CLI Binary (`pipx`, `brew`, `uv tool`, or `apt`)
 ```bash
 # Option A: via pipx
 pipx install aegis-2b
@@ -191,13 +204,23 @@ brew install Mhdomer/tap/aegis
 # Option C: via uv tool
 uv tool install aegis-2b
 
-# Option D: Install official signed release wheel (v0.2.1)
+# Option D: via Debian / Ubuntu package (.deb)
+curl -LO https://github.com/Mhdomer/aegis-2b/releases/download/v0.2.1/aegis-2b_0.2.1_all.deb
+sudo apt install ./aegis-2b_0.2.1_all.deb
+
+# Option E: Install official signed release wheel (v0.2.1)
 pip install https://github.com/Mhdomer/aegis-2b/releases/download/v0.2.1/aegis_2b-0.2.1-py3-none-any.whl
 ```
 
 ### 4. Pre-built Docker Container (CI/CD Pipelines)
 
 For teams running security checks inside CI/CD pipelines (e.g., GitHub Actions, GitLab CI, AWS CodeBuild) without local Python setup:
+
+- **Registry Image:** `ghcr.io/mhdomer/aegis-2b:latest`
+- **Supported Architectures:** Multi-arch `linux/amd64` and `linux/arm64` (Apple Silicon & AWS Graviton native).
+- **Hardened Multi-Stage Build:** Built with `python:3.12-slim` + `uv`, leaving no compilers or dev tools in the final image.
+- **Non-Root Execution:** Runs as dedicated system user `aegis` (UID `1000`, GID `1000`) with a designated `/workspace` directory.
+- **Workflow Automation:** Managed by `.github/workflows/docker.yml` with automatic multi-platform builds on push and tag releases.
 
 ```bash
 # Run 10-vector security self-audit
