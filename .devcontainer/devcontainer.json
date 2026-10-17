@@ -1,0 +1,20 @@
+{
+  "name": "Aegis-2B Sandbox (Strands Decider 2B)",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "postCreateCommand": "pip install -e '.[dev]' && aegis --version && aegis audit",
+  "forwardPorts": [8765],
+  "portsAttributes": {
+    "8765": {
+      "label": "Aegis-2B Web Operations Center",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "charliermarsh.ruff"
+      ]
+    }
+  }
+}
