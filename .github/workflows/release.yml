@@ -30,11 +30,13 @@ jobs:
       - name: Set up Python ${{ matrix.python-version }}
         run: uv python install ${{ matrix.python-version }}
 
-      - name: Run Test Suite
-        run: uv run --python ${{ matrix.python-version }} pytest
+      - name: Run Test Suite & Self-Audit
+        run: |
+          uv run --extra dev --python ${{ matrix.python-version }} pytest -v
+          uv run --extra dev --python ${{ matrix.python-version }} aegis audit
 
   build-and-release:
-    name: Build Wheel & Create GitHub Release
+    name: Build Wheel & Publish Release Assets
     needs: test
     runs-on: ubuntu-latest
     steps:
@@ -46,30 +48,48 @@ jobs:
         with:
           version: "latest"
 
-      - name: Build Wheel & Sdist
-        run: uv build
+      - name: Build Wheel, Sdist & SHA-256 Checksums
+        run: |
+          uv build
+          cd dist && sha256sum * > SHA256SUMS.txt
+
+      - name: Upload Package Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
 
       - name: Publish GitHub Release Assets
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           files: dist/*
-          name: "Aegis-2B ${{ github.ref_name }}"
+          name: "aegis-2b ${{ github.ref_name }}"
           generate_release_notes: true
           draft: false
           prerelease: false
-          body: |
-            ### 🛡️ Aegis-2B — Sub-Second Cloud Safety Circuit Breaker
-            **AWS Builder Center Hackathon (Strands Decider 2B Challenge)**
 
-            #### 🚀 Quick Install via pipx:
-            ```bash
-            pipx install https://github.com/Mhdomer/aegis-2b/releases/download/${{ github.ref_name }}/aegis_2b-0.1.0-py3-none-any.whl
-            ```
+  publish-pypi:
+    name: Publish to PyPI (Trusted Publisher OIDC)
+    needs: build-and-release
+    if: startsWith(github.ref, 'refs/tags/v') && vars.PYPI_TRUSTED_PUBLISHER == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/aegis-2b
+    permissions:
+      id-token: write
+    steps:
+      - name: Download built distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
 
-            #### 💻 CLI Commands:
-            * `aegis top`: Launch interactive k9s-style full-screen terminal cockpit
-            * `aegis ui`: Launch browser Web Operations Center (`http://127.0.0.1:8765`)
-            * `aegis demo --compare-llm`: Head-to-head battle vs. adversarial prompt injection
-            * `aegis benchmark`: Statistical latency (P50/P90/P99) and token cost benchmarks
-            * `aegis man`: Comprehensive Unix/Linux manual page
+      - name: Remove SHA256SUMS before PyPI upload
+        run: rm -f dist/SHA256SUMS.txt
+
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
