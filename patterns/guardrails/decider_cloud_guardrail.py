@@ -284,25 +284,21 @@ class DeciderCloudGuardrail:
         # Determine calibrated action and specific reasoning code
         if max_risk >= 0.50:
             action = GuardrailAction.ENFORCE_BREAK_GLASS
+            confidence = round(max_risk, 4)
             # Pick the most specific reasoning code while preserving clarity
             if has_injection_marker:
                 reasoning = "PROMPT_INJECTION_SIGNATURE_DETECTED"
-                confidence = max(0.942, injection_score)
             elif is_destructive:
                 reasoning = "HIGH_BLAST_RADIUS_OR_DESTRUCTIVE_TOOL"
-                confidence = 0.942 if destructive_score >= 0.94 else max_risk
             elif is_iam_escalation:
                 reasoning = "IAM_PRIVILEGE_ESCALATION_BLOCKED"
-                confidence = privilege_score
             elif opens_world_cidr or opens_public_bucket:
                 reasoning = "PUBLIC_EXPOSURE_MUTATION_BLOCKED"
-                confidence = network_exposure_score
             else:
                 reasoning = "HIGH_BLAST_RADIUS_OR_DESTRUCTIVE_TOOL"
-                confidence = max(0.912, blast_score)
         else:
             action = GuardrailAction.PERMIT_AUTO_REMEDIATION
-            confidence = 0.965
+            confidence = safe_score
             reasoning = "SAFE_ISOLATED_REMEDIATION"
 
         raw_scores = {
@@ -312,7 +308,7 @@ class DeciderCloudGuardrail:
             "network_exposure": round(network_exposure_score, 4),
             "blast_radius_risk": round(blast_score, 4),
             "injection_anomaly": round(injection_score, 4),
-            "safe_remediation": round(0.965 if action == GuardrailAction.PERMIT_AUTO_REMEDIATION else safe_score, 4),
+            "safe_remediation": safe_score,
         }
 
         # 6. Determine Model Tier & compute real tokens saved from payload byte length

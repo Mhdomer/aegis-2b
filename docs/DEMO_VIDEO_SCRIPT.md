@@ -37,15 +37,15 @@
 
 ---
 
-### Act II: Live Web Operations Center & 3-Tier Remediation (`0:30 – 1:35` | 65 Seconds)
+### Act II: Live Web Operations Center & 3-Tier Remediation (`0:30 - 1:35` | 65 Seconds)
 
 #### Visual Layout:
-* `0:30 – 0:52`: Split-screen showing the **5-Tab Web Operations Center** (`ui/dashboard.html`) and terminal running `uv run aegis remediate --iac`.
-  - **Scenario 1 (Benign SSH Brute Force):** Classified as `tier_0_rule` in **0.016 ms (`15.6 µs`)** with **96.5% confidence**.
+* `0:30 - 0:52`: Split-screen showing the **5-Tab Web Operations Center** (`ui/dashboard.html`) and terminal running `uv run aegis remediate --iac`.
+  - **Scenario 1 (Benign SSH Brute Force):** Classified as `tier_0_rule` in **0.016 ms (`15.6 µs`)** with **95.5% confidence**.
   - Saves **1,280 Bedrock tokens (`$0.00`)** and renders the declarative `infra/security_groups.tf` `git diff` right in the UI and terminal.
-* `0:52 – 1:15`: Terminal runs `uv run aegis test-aws` (or `uv run aegis demo --compare-llm`).
+* `0:52 - 1:15`: Terminal runs `uv run aegis demo --scenario adversarial` (or `uv run aegis test-aws`).
   - **Scenario 2 (Adversarial Prompt Injection):** Coerced `ec2.delete_security_group` call is intercepted inside Botocore's `before-parameter-build` hook in **0.505 ms** - raising `GuardrailBlockedError` before a single HTTP packet leaves the machine.
-* `1:15 – 1:35`: Click **Case 3: Default Route Change (MFA Gate)** in the Web UI (or run `uv run aegis remediate --iac --interactive`).
+* `1:15 - 1:35`: Click **Case 3: Default Route Change (MFA Gate)** in the Web UI (or run `uv run aegis demo --scenario blast_radius --interactive`).
   - High blast-radius `replace_route` (`0.0.0.0/0`) is halted (`VPC_WIDE`).
   - Enter Break-Glass MFA token `849201` -> verified with a signed `sha256:...` audit receipt and `infra/vpc_routing.tf` diff.
 
@@ -57,23 +57,23 @@
 
 ---
 
-### Act III: The Reusable Pattern & 10-Vector Self-Audit (`1:35 – 2:15` | 40 Seconds)
+### Act III: The Reusable Pattern & 10-Vector Self-Audit (`1:35 - 2:15` | 40 Seconds)
 
 #### Visual Layout:
-* `1:35 – 1:55`: Editor showing `patterns/guardrails/decider_cloud_guardrail.py` and the 3-line `guardrail.protect_boto3_client(boto3.client("ec2"))` snippet from `README.md`.
-* `1:55 – 2:15`: Terminal runs `uv run aegis audit` alongside **Tab 3 (`Security Audit (10/10)`)** and **Tab 2 (`Topology Diagram`)** in the Web UI.
+* `1:35 - 1:55`: Editor showing `patterns/guardrails/decider_cloud_guardrail.py` and the 3-line `guardrail.protect_boto3_client(boto3.client("ec2"))` snippet from `README.md`.
+* `1:55 - 2:15`: Terminal runs `uv run aegis audit` alongside **Tab 3 (`Security Audit (10/10)`)** and **Tab 2 (`Topology Diagram`)** in the Web UI.
   - All 10 red-team vectors (`SEC-01` through `SEC-10`, including zero-width Unicode and URL-encoded CIDR evasion) pass in **0.62 ms** total.
 
 #### Voiceover Narration:
 > *"The guardrail pattern is completely standalone inside `patterns/guardrails/`. Any builder can protect an existing `boto3.client` or `boto3.Session` in three lines of Python.*  
-> *Because Aegis-2B is itself a security control, we built a 10-vector red-team self-audit mapped to OWASP LLM Top 10 and MITRE ATLAS. Running `aegis audit` verifies prompt injection blocking, Unicode and URL-encoding deobfuscation, and fail-closed exception handling across all 10 vectors in 0.62 milliseconds."*
+> *Because Aegis-2B is itself a security control, we built a 10-vector red-team self-audit mapped to OWASP LLM Top 10 and MITRE ATLAS. Running `aegis audit` tests 10 live vectors, including zero-width Unicode deobfuscation and URL-encoded CIDR bypasses, passing all 10 checks in under one millisecond."*
 
 ---
 
-### Act IV: Empirical Benchmark & Economics (`2:15 – 2:45` | 30 Seconds)
+### Act IV: Empirical Benchmark & Economics (`2:15 - 2:45` | 30 Seconds)
 
 #### Visual Layout:
-* `2:15 – 2:45`: Terminal running `uv run aegis benchmark` and switching to **Tab 4 (`AWS Account & Sandbox`)** in the Web UI.
+* `2:15 - 2:45`: Terminal running `uv run aegis benchmark` and switching to **Tab 4 (`AWS Account & Sandbox`)** in the Web UI.
   - Highlights the measured numbers:
     - Schema evaluation: **0.016 ms (`15.6 µs`) P50**
     - Botocore pre-HTTP hook: **0.505 ms P50** vs **215.74 ms** warm `us-east-1` HTTPS RTT (**427x faster**) and **631.22 ms** cold TLS (**1,054x faster**).
@@ -85,13 +85,13 @@
 
 ---
 
-### Act V: Zero-Clone Install & Conclusion (`2:45 – 3:00` | 15 Seconds)
+### Act V: Zero-Clone Install & Conclusion (`2:45 - 3:00` | 15 Seconds)
 
 #### Visual Layout:
-* `2:45 – 3:00`: **Tab 5 (`Policy & Receipts`)** showing `uvx --from git+https://github.com/Mhdomer/aegis-2b aegis audit`, GitHub repo URL (`github.com/Mhdomer/aegis-2b`), and tags `#strands-decider-2b` and `#guardrails`.
+* `2:45 - 3:00`: **Tab 5 (`Policy & Receipts`)** showing `pip install aegis-2b`, `docker run ghcr.io/mhdomer/aegis-2b:latest audit`, GitHub repo URL (`github.com/Mhdomer/aegis-2b`), and tags `#strands-decider-2b` and `#guardrails`.
 
 #### Voiceover Narration:
-> *"You can run Aegis-2B right now without even cloning the repo using `uvx`, `pipx`, or `curl`. Check out the code and engineering log on GitHub. Thanks for watching!"*
+> *"Aegis-2B is available right now on PyPI via `pip install aegis-2b`, as a multi-arch container on GitHub Container Registry, and runs with zero install using `uvx aegis-2b audit`. Check out the code and engineering log on GitHub. Thanks for watching!"*
 
 ---
 
