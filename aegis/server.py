@@ -522,6 +522,36 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
             if audit_data["passed_count"] != audit_data["total_count"]:
                 exit_code = 1
 
+        elif "rollback" in cmd_str:
+            from aegis.dispatcher import AWSActionDispatcher
+            parts = cmd_str.split()
+            receipt_hash = ""
+            token = None
+            for i, p in enumerate(parts):
+                if p.startswith("sha256:"):
+                    receipt_hash = p
+                elif p in ("--token", "-t") and i + 1 < len(parts):
+                    token = parts[i + 1]
+            dispatcher = AWSActionDispatcher()
+            if not receipt_hash:
+                lines.append("Error: Please provide a valid SHA-256 receipt hash (e.g. aegis rollback sha256:f9e8...)")
+                exit_code = 1
+            else:
+                rb = dispatcher.rollback(receipt_hash, break_glass_token=token)
+                if rb.execution_status == "ROLLED_BACK":
+                    lines.append(f"Rollback Certified & Executed: Inverted mutation for receipt {receipt_hash}")
+                    lines.append(f"  Inverse Tool: {rb.proposed_tool}")
+                    lines.append(f"  Parameters:   {json.dumps(rb.parameters)}")
+                    lines.append(f"  New Receipt:  {rb.receipt_hash}")
+                elif rb.execution_status == "BLOCKED":
+                    lines.append(f"Rollback Gated by Circuit Breaker: Re-opening access introduces security exposure")
+                    lines.append(f"  Reason:       {rb.details.get('reason')}")
+                    lines.append(f"  Remedy:       Provide Break-Glass MFA token: `aegis rollback {receipt_hash} --token <MFA_TOKEN>`")
+                    exit_code = 1
+                else:
+                    lines.append(f"Rollback Failed: {rb.details.get('error')}")
+                    exit_code = 1
+
         elif "scan" in cmd_str:
             conn = get_live_aws_session()
             lines.append(f"aegis-2b v{__version__} | Cloud Infrastructure Posture Scanner")

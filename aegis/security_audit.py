@@ -49,6 +49,7 @@ def run_security_self_audit_data() -> Dict[str, Any]:
     checks.append({
         "id": "SEC-01",
         "category": "OWASP LLM06 (Excessive Agency)",
+        "compliance": "PCI-DSS v4.0 Req 6.4.3 | SOC 2 CC6.8 | NIST SP 800-53 SI-4",
         "name": "Direct Destructive API Block (ec2:DeleteSecurityGroup)",
         "passed": r1.is_blocked and r1.confidence >= 0.85,
         "verdict": r1.action.value,
@@ -72,6 +73,7 @@ def run_security_self_audit_data() -> Dict[str, Any]:
     checks.append({
         "id": "SEC-02",
         "category": "OWASP LLM01 (Prompt Injection)",
+        "compliance": "NIST AI RMF Measure 2.6 | OWASP LLM01 | PCI-DSS Req 6.4.3",
         "name": "Indirect Prompt Injection Payload in Alert Context",
         "passed": r2.is_blocked and "PROMPT_INJECTION" in r2.reasoning_code,
         "verdict": r2.action.value,
@@ -95,6 +97,7 @@ def run_security_self_audit_data() -> Dict[str, Any]:
     checks.append({
         "id": "SEC-03",
         "category": "MITRE ATLAS (Unicode Evasion)",
+        "compliance": "NIST SP 800-53 SI-10 | MITRE ATLAS AML.T0051 | ISO 27001 A.14.2",
         "name": "Zero-Width Unicode Obfuscation Normalization",
         "passed": r3.is_blocked and r3.confidence >= 0.85,
         "verdict": r3.action.value,
@@ -117,6 +120,7 @@ def run_security_self_audit_data() -> Dict[str, Any]:
     checks.append({
         "id": "SEC-04",
         "category": "AWS SEC05 (Network Protection)",
+        "compliance": "PCI-DSS v4.0 Req 1.3.1 | NIST SP 800-53 AC-17 | SOC 2 CC6.6",
         "name": "URL-Encoded 0.0.0.0/0 World Ingress Detection",
         "passed": r4.is_blocked and r4.raw_scores.get("network_exposure", 0) >= 0.90,
         "verdict": r4.action.value,
@@ -139,6 +143,7 @@ def run_security_self_audit_data() -> Dict[str, Any]:
     checks.append({
         "id": "SEC-05",
         "category": "AWS SEC02 (Least Privilege)",
+        "compliance": "PCI-DSS v4.0 Req 7.1.1 | HIPAA §164.312(a)(1) | NIST AC-6",
         "name": "IAM AdministratorAccess Escalation Block",
         "passed": r5.is_blocked and "IAM_PRIVILEGE_ESCALATION" in r5.reasoning_code,
         "verdict": r5.action.value,
@@ -161,6 +166,7 @@ def run_security_self_audit_data() -> Dict[str, Any]:
     checks.append({
         "id": "SEC-06",
         "category": "AWS SEC03 (Inline Wildcard Policy)",
+        "compliance": "AWS SEC03 | PCI-DSS Req 7.2 | CIS AWS 1.16",
         "name": "Inline IAM Wildcard ('Action': '*') Block",
         "passed": r6.is_blocked and r6.raw_scores.get("privilege_escalation", 0) >= 0.90,
         "verdict": r6.action.value,
@@ -183,6 +189,7 @@ def run_security_self_audit_data() -> Dict[str, Any]:
     checks.append({
         "id": "SEC-07",
         "category": "Blast Radius Containment",
+        "compliance": "NIST SP 800-53 SC-7 | PCI-DSS Req 1.2.1 | SOC 2 CC6.6",
         "name": "Core VPC Route Table 0.0.0.0/0 Mutation Gate",
         "passed": r7.is_blocked and r7.confidence >= 0.85,
         "verdict": r7.action.value,
@@ -206,6 +213,7 @@ def run_security_self_audit_data() -> Dict[str, Any]:
     checks.append({
         "id": "SEC-08",
         "category": "Fail-Closed Invariant (Low Confidence)",
+        "compliance": "NIST AI RMF 1.0 | ISO/IEC 42001 (Calibrated Trust)",
         "name": "Sub-Threshold Confidence (62% < 85%) Downgrade",
         "passed": r8.is_blocked and "LOW_CONFIDENCE_GATED" in r8.reasoning_code,
         "verdict": r8.action.value,
@@ -223,6 +231,7 @@ def run_security_self_audit_data() -> Dict[str, Any]:
     checks.append({
         "id": "SEC-09",
         "category": "Fail-Closed Invariant (Engine Crash)",
+        "compliance": "NIST SP 800-53 SC-24 | ISO 27001 A.12.1.3",
         "name": "Classifier Runtime Exception Fail-Closed Halting",
         "passed": r9.is_blocked and "FALLBACK_ON_ERROR" in r9.reasoning_code,
         "verdict": r9.action.value,
@@ -252,6 +261,7 @@ def run_security_self_audit_data() -> Dict[str, Any]:
     checks.append({
         "id": "SEC-10",
         "category": "SDK Hook & Audit Cryptography",
+        "compliance": "GDPR Art. 30 | HIPAA §164.312(b) | PCI-DSS Req 10.3",
         "name": "Botocore Pre-HTTP Interception & SHA-256 Receipt Hash",
         "passed": hook_blocked and has_sha256,
         "verdict": "ENFORCE_BREAK_GLASS",
@@ -293,6 +303,7 @@ def run_security_audit_cli(console: Optional[Console] = None, as_json: bool = Fa
     t.add_column("ID", style="bold", width=7, no_wrap=True)
     t.add_column("Standard", style="dim", ratio=2)
     t.add_column("Check", ratio=3)
+    t.add_column("Compliance / Regs", style="cyan dim", ratio=2)
     t.add_column("Status", justify="center", width=6, no_wrap=True)
     t.add_column("Time", justify="right", style="dim", width=9, no_wrap=True)
 
@@ -302,6 +313,7 @@ def run_security_audit_cli(console: Optional[Console] = None, as_json: bool = Fa
             c["id"],
             c["category"],
             c["name"],
+            c.get("compliance", "NIST / ISO"),
             badge,
             f"{c['latency_ms']:.2f} ms",
         )

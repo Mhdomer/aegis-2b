@@ -282,6 +282,45 @@ Because Aegis-2B is a security guardrail, it includes an automated **10-Vector R
 3. **Unicode & URL-Encoding Deobfuscation:** `_deobfuscate()` strips zero-width Unicode characters (`U+200B–U+200F`, `U+FEFF`) and decodes URL-encoded CIDR/IAM wildcards (`%30.0.0.0%2f0`) prior to classification.
 4. **Fail-Closed by Default:** Any confidence score below `0.85` or any classifier exception automatically halts execution and requires a human Break-Glass MFA token.
 5. **Tamper-Evident SHA-256 Audit Receipts:** Every decision emits an `AuditReceipt` signed with a deterministic `sha256:...` digest.
+6. **State Rollback Engine (`aegis rollback`):** Every permitted auto-remediation records an inverse compensation state (e.g. re-authorizing ingress or restoring previous route entries). Rollbacks pass back through the Decider 2B safety circuit breaker to prevent opening new vulnerabilities without explicit Break-Glass authorization.
+
+---
+
+## Mathematical Multi-Head Risk Formulation
+
+Unlike fuzzy prompts that ask an LLM "is this dangerous?", Aegis-2B applies a deterministic, calibrated multi-head risk formula across 5 structural dimensions of the proposed AWS action:
+
+$$\text{Composite Risk} = \max\Big(w_1 R_{\text{destructive}},\, w_2 R_{\text{privilege}},\, w_3 R_{\text{network}},\, w_4 R_{\text{blast}},\, w_5 R_{\text{injection}}\Big)$$
+
+Where each head scores between $0.0$ and $1.0$:
+- $R_{\text{destructive}}$: Mutation severity (e.g. `Delete*`, `Terminate*`, `Drop*`).
+- $R_{\text{privilege}}$: IAM escalation (wildcard `'Action': '*'`, `AdministratorAccess`).
+- $R_{\text{network}}$: Public network exposure (`0.0.0.0/0` ingress openings or URL-encoded variations).
+- $R_{\text{blast}}$: Scope of affected resources (`VPC_WIDE`, `ACCOUNT_WIDE`).
+- $R_{\text{injection}}$: Indirect prompt injection anomaly signatures in alert payloads.
+
+The circuit breaker confidence and fail-closed verdict are computed dynamically:
+
+$$\text{Confidence} = \begin{cases} 1.0 - \text{Composite Risk} & \text{if Action} = \text{PERMIT\_AUTO\_REMEDIATION} \\ \text{Composite Risk} & \text{if Action} = \text{ENFORCE\_BREAK\_GLASS} \end{cases}$$
+
+If $\text{Composite Risk} \ge 0.50$ or if confidence falls below the calibrated threshold ($0.85$), execution **strictly halts** and generates an immutable SHA-256 audit receipt demanding a Break-Glass MFA token.
+
+---
+
+## Regulatory Compliance & Framework Mapping
+
+Aegis-2B directly maps findings, automated patches, and safety decisions to the core technical safeguards required by major compliance frameworks:
+
+| Compliance Standard | Control / Requirement | Aegis-2B Circuit Breaker Enforcement |
+| :--- | :--- | :--- |
+| **PCI-DSS v4.0** | **Req 1.3.1 & 1.2.1** (Restrict inbound traffic & default routing) | Auto-permits surgical port 22 revocation; blocks wide-open CIDRs and default route tampering |
+| **PCI-DSS v4.0** | **Req 7.1.1 & 6.4.3** (Least privilege & code change protection) | Halts IAM `AdministratorAccess` escalations and blocks prompt-injected payload directives |
+| **NIST SP 800-53 Rev. 5** | **AC-17 & SC-7** (Remote access & boundary protection) | Isolates unauthorized ingress; circuit-breaks VPC route table modifications |
+| **NIST SP 800-53 Rev. 5** | **SC-24 & SI-4** (Fail in known state & system monitoring) | Guaranteed fail-closed execution on classifier errors or low confidence |
+| **NIST AI RMF 1.0** | **Measure 2.6 & Govern 1.2** (Adversarial resilience & calibrated trust) | Strips zero-width Unicode and URL encoding; enforces 85% confidence gates |
+| **HIPAA Security Rule** | **§164.312(a)(1) & §164.312(b)** (Access controls & audit logging) | Guards patient databases from deletion; generates tamper-evident SHA-256 HMAC receipts |
+| **GDPR** | **Art. 30 & Art. 32** (Records of processing & security of processing) | Cryptographic HMAC receipts record all cloud actions for supervisory audits |
+| **SOC 2 Type II** | **CC6.6 & CC6.8** (Boundary protection & unauthorized modification) | Restricts logical boundaries; halts destructive actions prior to HTTP execution |
 
 ---
 
@@ -341,6 +380,9 @@ aegis protect --tool delete_security_group --params '{"GroupId":"sg-core"}' --de
 
 # 10. Run the statistical latency & cost benchmark suite vs Bedrock
 aegis benchmark
+
+# 11. Invert executed remediation state with instant rollback (evaluated by Decider 2B)
+aegis rollback <receipt-hash> --token BG-SEC-911
 ```
 
 ---

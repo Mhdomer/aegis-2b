@@ -35,6 +35,7 @@ htmlcov/
 *.env
 *.pem
 *.key
+.aegis_receipts.json
 
 # IDE & Editor Configs
 .vscode/

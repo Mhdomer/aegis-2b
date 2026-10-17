@@ -42,6 +42,7 @@ def print_welcome_overview():
     cmd_table.add_row("aegis ui", "Start local web console on http://127.0.0.1:8765")
     cmd_table.add_row("aegis policy", "Show active policy rules from aegis.yaml")
     cmd_table.add_row("aegis benchmark", "Measure local classifier latency vs remote LLM roundtrip")
+    cmd_table.add_row("aegis rollback <hash>", "Invert executed remediation state using cryptographic SHA-256 receipt")
     cmd_table.add_row("aegis top", "Open terminal resource viewer")
     cmd_table.add_row("aegis man", "Show manual page")
 
@@ -307,6 +308,44 @@ def run_policy_command():
     console.print()
 
 
+def run_rollback_command(
+    receipt_hash: str,
+    token: Optional[str] = None,
+    as_json: bool = False,
+):
+    """Inverts a previously executed remediation action using its receipt hash."""
+    from rich.console import Console
+    from aegis.dispatcher import AWSActionDispatcher
+
+    console = Console()
+    dispatcher = AWSActionDispatcher()
+    receipt = dispatcher.rollback(receipt_hash, break_glass_token=token)
+
+    if as_json:
+        print(json.dumps(receipt.to_dict(), indent=2))
+        if receipt.execution_status != "ROLLED_BACK":
+            sys.exit(1)
+        return
+
+    console.print()
+    if receipt.execution_status == "ROLLED_BACK":
+        console.print(f"[bold green]Rollback Certified & Executed:[/bold green] Inverted mutation for receipt [cyan]{receipt_hash}[/cyan]")
+        console.print(f"  [bold]Inverse Tool:[/bold] {receipt.proposed_tool}")
+        console.print(f"  [bold]Parameters:[/bold]   {json.dumps(receipt.parameters)}")
+        console.print(f"  [bold]New Receipt:[/bold]  {receipt.receipt_hash}")
+        if receipt.details.get("break_glass_authorized"):
+            console.print(f"  [bold]Auth:[/bold]         Break-Glass MFA Authorized ({receipt.details.get('operator')})")
+    elif receipt.execution_status == "BLOCKED":
+        console.print(f"[bold red]Rollback Gated by Circuit Breaker:[/bold red] Re-opening access introduces security exposure")
+        console.print(f"  [bold]Reason:[/bold]       {receipt.details.get('reason')}")
+        console.print(f"  [bold]Remedy:[/bold]       Provide Break-Glass MFA override via `aegis rollback {receipt_hash} --token <MFA_TOKEN>`")
+        sys.exit(1)
+    else:
+        console.print(f"[bold red]Rollback Failed:[/bold red] {receipt.details.get('error')}")
+        sys.exit(1)
+    console.print()
+
+
 def main():
     from aegis import __version__
 
@@ -464,6 +503,25 @@ def main():
         help="Display comprehensive Unix/Linux manual page",
     )
 
+    # Command: rollback (Invert executed cloud remediation)
+    p_rollback = subparsers.add_parser(
+        "rollback",
+        help="Invert executed cloud remediation using cryptographic SHA-256 receipt",
+    )
+    p_rollback.add_argument(
+        "receipt_hash",
+        help="SHA-256 receipt hash to rollback (e.g. sha256:7f4c...)",
+    )
+    p_rollback.add_argument(
+        "--token",
+        help="Emergency Break-Glass MFA token if rollback re-opens security exposure",
+    )
+    p_rollback.add_argument(
+        "--json",
+        action="store_true",
+        help="Emit results in machine-readable JSON format",
+    )
+
     args = parser.parse_args()
 
     # If no command passed and no flags: print welcome overview
@@ -550,6 +608,13 @@ def main():
     elif args.command in ("man", "manual"):
         from aegis.manual import display_manual
         display_manual()
+
+    elif args.command == "rollback":
+        run_rollback_command(
+            receipt_hash=args.receipt_hash,
+            token=args.token,
+            as_json=args.json,
+        )
 
     else:
         parser.print_help()

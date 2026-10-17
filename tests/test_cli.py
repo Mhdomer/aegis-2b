@@ -154,6 +154,39 @@ def test_security_self_audit_10_vectors():
     for check in audit["checks"]:
         assert check["passed"] is True
         assert check["latency_ms"] >= 0.0
+        assert "compliance" in check
+
+
+def test_rollback_cli_and_server_execution():
+    from aegis.dispatcher import AWSActionDispatcher
+    from patterns.guardrails import DeciderCloudGuardrail, DeciderState, BlastRadius, DeciderResult, GuardrailAction
+
+    # Pre-populate a receipt in dispatcher
+    dispatcher = AWSActionDispatcher()
+    state = DeciderState(
+        alert_source="test.cli_rollback",
+        alert_severity="LOW",
+        target_arn="arn:aws:ec2:us-east-1:111122223333:security-group/sg-0123456789",
+        proposed_tool="revoke_security_group_ingress",
+        tool_parameters={"GroupId": "sg-0123456789", "CidrIp": "0.0.0.0/0", "Port": 22},
+        blast_radius=BlastRadius.ISOLATED,
+        is_destructive_action=False,
+    )
+    result = DeciderResult(
+        action=GuardrailAction.PERMIT_AUTO_REMEDIATION,
+        confidence=0.965,
+        latency_ms=0.016,
+        reasoning_code="SAFE_ISOLATED_REMEDIATION",
+    )
+    rec = dispatcher.dispatch(state, result)
+    assert rec.execution_status == "EXECUTED"
+
+    # Test server handler rollback
+    from aegis.server import AegisAPIHandler
+    handler = AegisAPIHandler.__new__(AegisAPIHandler)
+    server_res = handler._handle_cli_execute(f"aegis rollback {rec.receipt_hash} --token BG-SEC-911")
+    assert server_res["exit_code"] == 0
+    assert "Rollback Certified & Executed" in server_res["output"]
 
 
 

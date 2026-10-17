@@ -11,6 +11,15 @@
     "Label": "HIGH",
     "Normalized": 70
   },
+  "Compliance": {
+    "Status": "FAILED",
+    "RelatedRequirements": [
+      "PCI DSS v4.0/1.3.1",
+      "NIST SP 800-53 Rev. 5/AC-17",
+      "SOC 2/CC6.6",
+      "CIS AWS Foundations Benchmark v1.4.0/5.2"
+    ]
+  },
   "Title": "SSH brute force detected against EC2 instance",
   "Description": "Multiple unauthorized SSH authentication attempts observed from 198.51.100.4 against instance i-0123456789 on port 22.",
   "Resources": [

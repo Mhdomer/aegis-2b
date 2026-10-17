@@ -193,6 +193,7 @@ class DeciderCloudGuardrail:
                 confidence=1.0,
                 latency_ms=round(elapsed_ms, 3),
                 reasoning_code=f"FALLBACK_ON_ERROR: {str(exc)}",
+                compliance_frameworks=["NIST SP 800-53 SC-24 (Fail in Known State)", "ISO 27001 A.12.1.3"],
             )
 
     def _default_evaluator(self, state: DeciderState, question: str) -> DeciderResult:
@@ -348,6 +349,19 @@ class DeciderCloudGuardrail:
 
         tf_diff = self.generate_terraform_diff(state)
 
+        frameworks: List[str] = []
+        if injection_score >= 0.85:
+            frameworks.extend(["NIST AI RMF 1.0 (Measure 2.6)", "OWASP LLM01", "PCI-DSS v4.0 Req 6.4.3"])
+        if privilege_score >= 0.85:
+            frameworks.extend(["PCI-DSS v4.0 Req 7.1.1 (Least Privilege)", "HIPAA §164.312(a)(1)", "NIST SP 800-53 AC-6"])
+        if network_exposure_score >= 0.85 or "ingress" in tool_lower:
+            frameworks.extend(["PCI-DSS v4.0 Req 1.3.1", "NIST SP 800-53 AC-17 (Remote Access)", "SOC 2 CC6.6"])
+        if "route" in tool_lower or "rtb-" in arn_lower:
+            frameworks.extend(["NIST SP 800-53 SC-7 (Boundary Protection)", "PCI-DSS Req 1.2.1"])
+        if not frameworks:
+            frameworks = ["NIST SP 800-53 SI-4", "CIS AWS Foundations 1.4"]
+        dedup_frameworks = list(dict.fromkeys(frameworks))
+
         return DeciderResult(
             action=action,
             confidence=round(confidence, 4),
@@ -359,6 +373,7 @@ class DeciderCloudGuardrail:
             target_service=target_service,
             estimated_tokens_saved=tokens_saved,
             terraform_diff=tf_diff,
+            compliance_frameworks=dedup_frameworks,
         )
 
     @staticmethod

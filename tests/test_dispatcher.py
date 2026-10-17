@@ -219,3 +219,50 @@ def test_verify_break_glass_token_helper():
     assert verify_break_glass_token("") is False
     assert verify_break_glass_token(None) is False
 
+
+def test_rollback_executed_remediation_with_and_without_mfa():
+    dispatcher = AWSActionDispatcher()
+    state = DeciderState(
+        alert_source="test.rollback",
+        alert_severity="LOW",
+        target_arn="arn:aws:ec2:us-east-1:111122223333:security-group/sg-0123456789",
+        proposed_tool="revoke_security_group_ingress",
+        tool_parameters={"GroupId": "sg-0123456789", "CidrIp": "0.0.0.0/0", "Port": 22},
+        blast_radius=BlastRadius.ISOLATED,
+        is_destructive_action=False,
+    )
+    result = DeciderResult(
+        action=GuardrailAction.PERMIT_AUTO_REMEDIATION,
+        confidence=0.965,
+        latency_ms=0.016,
+        reasoning_code="SAFE_ISOLATED_REMEDIATION",
+    )
+
+    # 1. Execute original safe remediation
+    receipt = dispatcher.dispatch(state, result)
+    assert receipt.execution_status == "EXECUTED"
+    assert len(dispatcher.get_security_group_state("sg-0123456789")["IngressRules"]) == 0
+
+    # 2. Rollback without MFA token (Decider 2B gates re-opening 0.0.0.0/0)
+    rb_blocked = dispatcher.rollback(receipt.receipt_hash)
+    assert rb_blocked.execution_status == "BLOCKED"
+    assert "Break-Glass MFA token required" in rb_blocked.details["reason"]
+
+    # 3. Rollback with authorized Break-Glass MFA token
+    rb_success = dispatcher.rollback(receipt.receipt_hash, break_glass_token="BG-SEC-911", operator_id="admin-omar")
+    assert rb_success.execution_status == "ROLLED_BACK"
+    assert rb_success.details["rollback_target"] == receipt.receipt_hash
+    assert rb_success.details["break_glass_authorized"] is True
+
+    # Ingress rule restored!
+    sg_restored = dispatcher.get_security_group_state("sg-0123456789")
+    assert len(sg_restored["IngressRules"]) == 1
+    assert sg_restored["IngressRules"][0]["Port"] == 22
+
+
+def test_rollback_nonexistent_receipt_fails():
+    dispatcher = AWSActionDispatcher()
+    res = dispatcher.rollback("sha256:0000000000000000")
+    assert res.execution_status == "FAILED"
+    assert "not found" in res.details["error"]
+

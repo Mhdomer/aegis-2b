@@ -63,6 +63,7 @@ class DeciderResult:
     target_service: str = "ec2"
     estimated_tokens_saved: int = 2400
     terraform_diff: str = ""
+    compliance_frameworks: List[str] = field(default_factory=list)
 
     @property
     def is_blocked(self) -> bool:
@@ -80,6 +81,7 @@ class DeciderResult:
             "target_service": self.target_service,
             "estimated_tokens_saved": self.estimated_tokens_saved,
             "terraform_diff": self.terraform_diff,
+            "compliance_frameworks": self.compliance_frameworks,
         }
 
 
