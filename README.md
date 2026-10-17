@@ -60,6 +60,66 @@ Aegis-2B solves this by splitting responsibilities into two distinct models:
 
 ![Aegis-2B Web Operations Center](docs/images/aegis-web-dashboard.png)
 
+### Production AWS Architecture & Data Flow
+
+```text
+  [ AWS Security Hub / GuardDuty ]  ───────►  [ Amazon EventBridge ]
+                 │                                     │
+                 ▼ (ASFF Finding JSON)                 ▼
+  ┌────────────────────────────────────────────────────────────┐
+  │                    AEGIS-2B RUNTIME                        │
+  │                                                            │
+  │  1. 3-Tier Router & Cognitive Planner                      │
+  │     ├─ Tier 0: Direct Rule (0 tokens, $0.00) ────────────┐ │
+  │     ├─ Tier 1: Nova Micro / Haiku (Light Triage)         │ │
+  │     └─ Tier 2: Claude 3.5 Sonnet (Cognitive Planning)    │ │
+  │                                                          │ │
+  │  2. Botocore Pre-HTTP Hook (before-parameter-build.*.*)  │ │
+  │     ├─ Input Normalization (Unicode & URL Deobfuscation) │ │
+  │     └─ Calibrated 2B Gate (~115ms / 0.034ms Local Eval)  │ │
+  │                                                          │ │
+  │  3. Fail-Closed Circuit Breaker Boundary                 │ │
+  │     ├─ Confidence < 0.85 or Destructive Mutation?        │ │
+  │     │   └─► HALT: Enforce Break-Glass MFA Token          │ │
+  │     │       & Emit Audit Receipt (Zero AWS Packets)      │ │
+  │     │                                                    │ │
+  │     └─► PERMIT: Execute via Boto3                        │ │
+  │         ├─ Step A: Execute Mutation on AWS               │ │
+  │         ├─ Step B: Emit Declarative Terraform git diff   │ │
+  │         └─ Step C: Log SHA-256 Receipt to Audit Ledger   │ │
+  └──────────────────────────────┬─────────────────────────────┘
+                                 │
+                 ┌───────────────┴───────────────┐
+                 ▼                               ▼
+       [ Live AWS API Targets ]       [ GitOps & IaC State ]
+       • EC2 Security Groups          • infra/security_groups.tf
+       • VPC Route Tables             • infra/vpc_routing.tf
+       • IAM Roles & Policies         • infra/iam.tf
+       • S3 Bucket Policies           (Prevents Out-of-Band Drift)
+```
+
+### Production AWS Deployment Topologies
+
+Aegis-2B supports three production integration topologies depending on how your team runs cloud agents:
+
+1. **Topology A: Embedded Python SDK (Lambda / ECS / EC2)**  
+   Directly attach the safety circuit breaker to any existing Boto3 session in your Python agent with one line of code:
+   ```python
+   import boto3
+   from patterns.guardrails import DeciderCloudGuardrail
+
+   guardrail = DeciderCloudGuardrail(risk_threshold=0.85, simulate_local_latency=False)
+   session = boto3.Session()
+   guardrail.protect_boto3_session(session, environment="production")
+   # All client mutations (ec2, s3, iam) are now intercepted pre-HTTP before network transmission!
+   ```
+
+2. **Topology B: In-VPC Sidecar Daemon (ECS Fargate / EKS / Containerized Agent)**  
+   Run `aegis serve` (or `docker run ghcr.io/mhdomer/aegis-2b:latest serve`) as a sidecar container listening on `http://127.0.0.1:8765`. Multi-language agents (TypeScript, Go, Python) POST alerts to `/api/evaluate` for sub-millisecond pre-flight checks before invoking AWS APIs.
+
+3. **Topology C: GitOps CI/CD & Terraform Drift Gate (GitHub Actions / GitLab CI)**  
+   Run `aegis remediate --iac` in automated workflows. Instead of making blind runtime mutations that drift from your infrastructure code, Aegis-2B generates ready-to-apply Terraform `git diff` patches for pull request review.
+
 ### The Dual-Model Workflow
 
 1. **Ingestion:** Ingests AWS Security Hub / GuardDuty findings (ASFF JSON).
@@ -76,6 +136,20 @@ Aegis-2B solves this by splitting responsibilities into two distinct models:
 5. **Fail-Closed Gating:**
    - **Path A (`PERMIT_AUTO_REMEDIATION`):** Bounded, isolated, high-confidence ($\ge 0.85$) fixes execute automatically via Boto3 in under a second.
    - **Path B (`ENFORCE_BREAK_GLASS`):** Destructive verbs, prompt injections, high blast-radius changes, or low-confidence results (<85%) immediately halt execution and require a verified human SecOps Break-Glass MFA token.
+
+### Regulatory Compliance & Framework Safeguards
+
+Aegis-2B directly enforces the technical controls required by primary enterprise compliance frameworks:
+
+| Compliance Framework | Requirement / Control | Aegis-2B Circuit Breaker Implementation |
+|---|---|---|
+| **PCI-DSS v4.0** | **Req 1.3.1 & 1.2.1** (Inbound traffic restriction & routing controls) | Auto-permits surgical port 22 revocation; gates world-open CIDRs and default route alterations. |
+| **PCI-DSS v4.0** | **Req 7.1.1 & 6.4.3** (Least privilege & software supply chain integrity) | Blocks IAM `AdministratorAccess` escalations; stops indirect prompt injection directive hijacking. |
+| **NIST SP 800-53 Rev. 5** | **AC-17 & SC-7** (Remote access boundary & network isolation) | Restricts unauthorized ingress; gates VPC route table mutations. |
+| **NIST SP 800-53 Rev. 5** | **SC-24 & SI-4** (Fail in known state & system monitoring) | Invariant: Strict fail-closed execution on classifier crash, parse error, or low confidence. |
+| **NIST AI RMF 1.0** | **Measure 2.6 & Govern 1.2** (Adversarial robustness & calibrated trust) | Normalizes zero-width Unicode and URL evasion; enforces 85% confidence gates. |
+| **HIPAA Security Rule** | **§164.312(a)(1) & §164.312(b)** (Technical safeguards & audit trails) | Protects storage from destructive drops; logs tamper-evident SHA-256 receipts. |
+| **GDPR** | **Art. 30 & Art. 32** (Records of processing & security of processing) | Cryptographic HMAC audit receipts record all cloud actions for supervisory audits. |
 
 ---
 
