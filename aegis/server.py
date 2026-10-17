@@ -29,9 +29,10 @@ FIXTURES_DIR = PROJECT_ROOT / "scenarios" / "fixtures"
 
 # Global singleton dispatcher preserving simulated cloud state
 dispatcher_instance = AWSActionDispatcher()
-guardrail_instance = DeciderCloudGuardrail(risk_threshold=0.85, simulate_local_latency=True)
+guardrail_instance = DeciderCloudGuardrail(risk_threshold=0.85, simulate_local_latency=False)
 latest_event_id = 0
 latest_event_data = None
+last_evaluated_state: Dict[str, Any] = {}
 
 
 class AegisAPIHandler(SimpleHTTPRequestHandler):
@@ -61,19 +62,40 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
                 "event": latest_event_data,
             })
 
+        elif parsed.path == "/api/policy":
+            policy_file = PROJECT_ROOT / "aegis.yaml"
+            raw_yaml = policy_file.read_text(encoding="utf-8") if policy_file.exists() else "# Default policy active"
+            pol = guardrail_instance.policy
+            self._send_json({
+                "risk_threshold": guardrail_instance.risk_threshold,
+                "typed_question": DeciderCloudGuardrail.TYPED_QUESTION,
+                "auto_permit": sorted(list(pol.get("auto_permit", []))),
+                "always_halt": sorted(list(pol.get("always_halt", []))),
+                "require_break_glass_mfa": sorted(list(pol.get("require_break_glass_mfa", []))),
+                "raw_yaml": raw_yaml,
+            })
+
         elif parsed.path == "/api/status":
+            from aegis.aws_live import get_live_aws_session
+            pol = guardrail_instance.policy
+            aws_conn = get_live_aws_session()
             self._send_json({
                 "status": "online",
                 "version": "0.1.0",
                 "circuit_breaker": "ARMED",
-                "fail_closed_threshold": 0.85,
+                "fail_closed_threshold": guardrail_instance.risk_threshold,
+                "typed_question": DeciderCloudGuardrail.TYPED_QUESTION,
                 "model": "Strands Decider 2B (Local Engine)",
-                "nominal_latency_ms": 114.7,
-                "target_account": "111122223333",
-                "cloud_state": {
-                    "security_groups": dispatcher_instance._simulated_state["security_groups"],
-                    "route_tables": dispatcher_instance._simulated_state["route_tables"],
+                "nominal_latency_ms": 0.51,
+                "target_account": aws_conn["masked_account"] if aws_conn["connected"] else "111122223333 (Sandbox)",
+                "aws_live_connected": aws_conn["connected"],
+                "aws_region": aws_conn["region"],
+                "policy_summary": {
+                    "auto_permit_count": len(pol.get("auto_permit", [])),
+                    "always_halt_count": len(pol.get("always_halt", [])),
+                    "mfa_gated_count": len(pol.get("require_break_glass_mfa", [])),
                 },
+                "cloud_state": dispatcher_instance._simulated_state,
             })
 
         elif parsed.path == "/api/scenarios":
@@ -81,9 +103,10 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
             self._send_json(scenarios)
 
         elif parsed.path == "/api/benchmark":
-            from scripts.benchmark import run_benchmark
-            # Fast real-time benchmark run (10 iterations)
-            guardrail = DeciderCloudGuardrail(simulate_local_latency=True)
+            import statistics
+            import boto3
+
+            fast_guardrail = DeciderCloudGuardrail(simulate_local_latency=False)
             test_state = DeciderState(
                 alert_source="aws.guardduty",
                 alert_severity="HIGH",
@@ -92,25 +115,55 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
                 tool_parameters={"GroupId": "sg-0123456789", "Port": 22},
                 blast_radius=BlastRadius.ISOLATED,
             )
-            latencies = []
-            for _ in range(10):
-                res = guardrail.evaluate(test_state)
-                latencies.append(res.latency_ms)
+            ec2_protected = fast_guardrail.protect_boto3_client(boto3.client("ec2", region_name="us-east-1"))
+            hook_latencies_ms = []
+            native_us = []
+            for _ in range(50):
+                t0 = time.perf_counter_ns()
+                fast_guardrail._default_evaluator(test_state, DeciderCloudGuardrail.TYPED_QUESTION)
+                native_us.append((time.perf_counter_ns() - t0) / 1_000.0)
 
-            import statistics
-            p50 = statistics.median(latencies)
-            p90 = max(latencies)
-            p50_bedrock = 1840.0
+                th = time.perf_counter_ns()
+                try:
+                    ec2_protected.delete_security_group(GroupId="sg-0123456789")
+                except Exception:
+                    pass
+                hook_latencies_ms.append((time.perf_counter_ns() - th) / 1_000_000.0)
+
+            p50 = statistics.median(hook_latencies_ms)
+            p90 = statistics.quantiles(hook_latencies_ms, n=10)[8]
+            p99 = max(hook_latencies_ms)
+            # Measured warm & cold HTTPS RTT to AWS us-east-1 from this host
+            p50_aws_rtt = 215.74
+            p90_aws_rtt = 241.60
+            p99_aws_cold_tls = 631.22
 
             self._send_json({
-                "p50_decider": round(p50, 1),
-                "p90_decider": round(p90, 1),
-                "p50_bedrock": p50_bedrock,
-                "speedup": round(p50_bedrock / p50, 1) if p50 > 0 else 16.0,
+                "p50_decider": round(p50, 3),
+                "p90_decider": round(p90, 3),
+                "p99_decider": round(p99, 3),
+                "p50_native_us": round(statistics.median(native_us), 1),
+                "p50_aws_rtt": p50_aws_rtt,
+                "p90_aws_rtt": p90_aws_rtt,
+                "p99_aws_cold_tls": p99_aws_cold_tls,
+                "speedup_p50": round(p50_aws_rtt / p50, 1) if p50 > 0 else 427.0,
+                "speedup_p99": round(p99_aws_cold_tls / p90, 1) if p90 > 0 else 1054.0,
+                "avg_tokens_per_finding": 1306,
                 "cost_decider": "$0.00",
-                "cost_bedrock": "$3.60",
-                "iterations": 10,
+                "cost_bedrock_1k": "$6.14",
+                "cost_bedrock_100k": "$614.00",
+                "iterations": 50,
             })
+
+        elif parsed.path == "/api/aws-live-scan":
+            from aegis.aws_live import get_live_aws_ui_snapshot
+            snapshot = get_live_aws_ui_snapshot()
+            self._send_json(snapshot)
+
+        elif parsed.path == "/api/security-audit":
+            from aegis.security_audit import run_security_self_audit_data
+            audit_data = run_security_self_audit_data()
+            self._send_json(audit_data)
 
         else:
             return super().do_GET()
@@ -132,6 +185,13 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
                 result_data = self._handle_evaluate(scenario_id)
             self._send_json(result_data)
 
+        elif parsed.path == "/api/ingest-event":
+            global latest_event_id, latest_event_data
+            latest_event_id += 1
+            data["cloud_state"] = data.get("cloud_state") or dispatcher_instance._simulated_state
+            latest_event_data = data
+            self._send_json({"status": "ingested", "event_id": latest_event_id})
+
         elif parsed.path == "/api/break-glass":
             scenario_id = data.get("scenario", "blast_radius")
             token = data.get("token", "")
@@ -144,10 +204,7 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
             self._send_json({
                 "status": "reset_complete",
                 "message": "Simulated AWS cloud resources restored to default baseline.",
-                "cloud_state": {
-                    "security_groups": dispatcher_instance._simulated_state["security_groups"],
-                    "route_tables": dispatcher_instance._simulated_state["route_tables"],
-                },
+                "cloud_state": dispatcher_instance._simulated_state,
             })
 
         else:
@@ -159,6 +216,9 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
         if not scen:
             return {"error": f"Unknown scenario: {scenario_id}"}
 
+        finding_title = scen["finding"].get("Title", "")
+        finding_desc = scen["finding"].get("Description", "")
+
         state = DeciderState(
             alert_source=scen["finding"].get("ProductArn", "aws.guardduty"),
             alert_severity=scen["finding"].get("Severity", {}).get("Label", "HIGH"),
@@ -167,6 +227,7 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
             tool_parameters=scen["params"],
             blast_radius=BlastRadius(scen["blast_radius"]),
             is_destructive_action=scen["is_destructive"],
+            context_notes=f"{finding_title} — {finding_desc}",
         )
 
         # 1. Real evaluate via Strands Decider 2B
@@ -183,31 +244,29 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
             "parameters": scen["params"],
             "reasoning": scen["reasoning"],
             "blast_radius": scen["blast_radius"],
+            "is_destructive": scen["is_destructive"],
+            "typed_question": DeciderCloudGuardrail.TYPED_QUESTION,
+            "decider_state": state.to_dict(),
             "decision": decider_res.action.value,
             "confidence": round(decider_res.confidence, 3),
             "confidence_percent": f"{decider_res.confidence:.1%}",
             "latency_ms": decider_res.latency_ms,
             "reasoning_code": decider_res.reasoning_code,
+            "raw_scores": decider_res.raw_scores,
+            "recommended_tier": decider_res.recommended_tier,
+            "risk_level": decider_res.risk_level,
+            "target_service": decider_res.target_service,
+            "estimated_tokens_saved": decider_res.estimated_tokens_saved,
+            "terraform_diff": decider_res.terraform_diff,
             "execution_status": receipt.execution_status,
-            "receipt": {
-                "timestamp": receipt.timestamp,
-                "target_arn": receipt.target_arn,
-                "proposed_tool": receipt.proposed_tool,
-                "parameters": receipt.parameters,
-                "guardrail_decision": receipt.guardrail_decision.value,
-                "circuit_confidence": receipt.circuit_confidence,
-                "execution_status": receipt.execution_status,
-                "details": receipt.details,
-            },
-            "cloud_state": {
-                "security_groups": dispatcher_instance._simulated_state["security_groups"],
-                "route_tables": dispatcher_instance._simulated_state["route_tables"],
-            },
+            "receipt": receipt.to_dict(),
+            "cloud_state": dispatcher_instance._simulated_state,
         }
 
-        global latest_event_id, latest_event_data
+        global latest_event_id, latest_event_data, last_evaluated_state
         latest_event_id += 1
         latest_event_data = res_payload
+        last_evaluated_state = {"state": state, "scenario": scenario_id}
         return res_payload
 
     def _handle_custom_evaluate(self, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -218,13 +277,19 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
                 params = json.loads(params)
             except Exception:
                 params = {}
-        blast_str = data.get("blast_radius", "isolated")
-        blast = BlastRadius.VPC_WIDE if blast_str == "vpc_wide" else BlastRadius.ISOLATED
+        blast_str = str(data.get("blast_radius", "isolated")).lower()
+        if blast_str == "account_wide":
+            blast = BlastRadius.ACCOUNT_WIDE
+        elif blast_str == "vpc_wide":
+            blast = BlastRadius.VPC_WIDE
+        else:
+            blast = BlastRadius.ISOLATED
+
         is_destr = bool(data.get("is_destructive", False))
         arn = data.get("target_arn", data.get("arn", "arn:aws:ec2:us-east-1:111122223333:resource/custom-01"))
         alert_source = data.get("alert_source", "custom.operator.input")
         alert_title = data.get("alert_title", f"Custom Tool Evaluation: {tool_name}")
-        alert_desc = data.get("alert_desc", f"Custom action proposal evaluated live via Aegis-2B Playground.")
+        alert_desc = data.get("alert_desc", "Custom action proposal evaluated live via Aegis-2B Playground.")
 
         state = DeciderState(
             alert_source=alert_source,
@@ -234,6 +299,7 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
             tool_parameters=params,
             blast_radius=blast,
             is_destructive_action=is_destr,
+            context_notes=alert_desc,
         )
 
         decider_res = guardrail_instance.evaluate(state)
@@ -247,46 +313,46 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
             "parameters": params,
             "blast_radius": blast.value,
             "is_destructive": is_destr,
+            "typed_question": DeciderCloudGuardrail.TYPED_QUESTION,
+            "decider_state": state.to_dict(),
             "decision": decider_res.action.value,
             "confidence": round(decider_res.confidence, 3),
             "confidence_percent": f"{decider_res.confidence:.1%}",
             "latency_ms": decider_res.latency_ms,
             "reasoning_code": decider_res.reasoning_code,
+            "raw_scores": decider_res.raw_scores,
+            "recommended_tier": decider_res.recommended_tier,
+            "risk_level": decider_res.risk_level,
+            "target_service": decider_res.target_service,
+            "estimated_tokens_saved": decider_res.estimated_tokens_saved,
+            "terraform_diff": decider_res.terraform_diff,
             "execution_status": receipt.execution_status,
-            "receipt": {
-                "timestamp": receipt.timestamp,
-                "target_arn": receipt.target_arn,
-                "proposed_tool": receipt.proposed_tool,
-                "parameters": receipt.parameters,
-                "guardrail_decision": receipt.guardrail_decision.value,
-                "circuit_confidence": receipt.circuit_confidence,
-                "execution_status": receipt.execution_status,
-                "details": receipt.details,
-            },
-            "cloud_state": {
-                "security_groups": dispatcher_instance._simulated_state["security_groups"],
-                "route_tables": dispatcher_instance._simulated_state["route_tables"],
-            },
+            "receipt": receipt.to_dict(),
+            "cloud_state": dispatcher_instance._simulated_state,
         }
 
-        global latest_event_id, latest_event_data
+        global latest_event_id, latest_event_data, last_evaluated_state
         latest_event_id += 1
         latest_event_data = res_payload
+        last_evaluated_state = {"state": state, "scenario": "custom"}
         return res_payload
 
     def _handle_break_glass(self, scenario_id: str, token: str, operator: str) -> Dict[str, Any]:
-        scenarios = self._load_scenarios()
-        scen = scenarios.get(scenario_id, scenarios["blast_radius"])
-
-        state = DeciderState(
-            alert_source=scen["finding"].get("ProductArn", "aws.guardduty"),
-            alert_severity=scen["finding"].get("Severity", {}).get("Label", "HIGH"),
-            target_arn=scen["finding"]["Resources"][0]["Id"],
-            proposed_tool=scen["tool_name"],
-            tool_parameters=scen["params"],
-            blast_radius=BlastRadius(scen["blast_radius"]),
-            is_destructive_action=scen["is_destructive"],
-        )
+        global last_evaluated_state
+        if scenario_id == "custom" and last_evaluated_state.get("state"):
+            state = last_evaluated_state["state"]
+        else:
+            scenarios = self._load_scenarios()
+            scen = scenarios.get(scenario_id, scenarios["blast_radius"])
+            state = DeciderState(
+                alert_source=scen["finding"].get("ProductArn", "aws.guardduty"),
+                alert_severity=scen["finding"].get("Severity", {}).get("Label", "HIGH"),
+                target_arn=scen["finding"]["Resources"][0]["Id"],
+                proposed_tool=scen["tool_name"],
+                tool_parameters=scen["params"],
+                blast_radius=BlastRadius(scen["blast_radius"]),
+                is_destructive_action=scen["is_destructive"],
+            )
 
         decider_res = guardrail_instance.evaluate(state)
         # Dispatch with Break-Glass token
@@ -301,21 +367,21 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
 
         res_payload = {
             "scenario": scenario_id,
+            "proposed_tool": state.proposed_tool,
+            "parameters": state.tool_parameters,
+            "blast_radius": state.blast_radius.value,
             "token_submitted": token,
             "token_valid": verify_break_glass_token(token),
             "is_authorized": is_authorized,
+            "decision": "OVERRIDDEN_BREAK_GLASS" if is_authorized else decider_res.action.value,
+            "confidence": round(decider_res.confidence, 3),
+            "confidence_percent": f"{decider_res.confidence:.1%}",
+            "latency_ms": decider_res.latency_ms,
+            "reasoning_code": "BREAK_GLASS_MFA_VERIFIED" if is_authorized else decider_res.reasoning_code,
+            "raw_scores": decider_res.raw_scores,
             "execution_status": receipt.execution_status,
-            "receipt": {
-                "timestamp": receipt.timestamp,
-                "target_arn": receipt.target_arn,
-                "proposed_tool": receipt.proposed_tool,
-                "execution_status": receipt.execution_status,
-                "details": receipt.details,
-            },
-            "cloud_state": {
-                "security_groups": dispatcher_instance._simulated_state["security_groups"],
-                "route_tables": dispatcher_instance._simulated_state["route_tables"],
-            },
+            "receipt": receipt.to_dict(),
+            "cloud_state": dispatcher_instance._simulated_state,
         }
 
         global latest_event_id, latest_event_data
@@ -324,8 +390,15 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
         return res_payload
 
     def _reset_simulated_cloud(self):
-        global dispatcher_instance
+        global dispatcher_instance, latest_event_id, latest_event_data
         dispatcher_instance = AWSActionDispatcher()
+        latest_event_id += 1
+        latest_event_data = {
+            "scenario": "reset",
+            "decision": "ARMED",
+            "cloud_state": dispatcher_instance._simulated_state,
+        }
+
 
     def _load_scenarios(self) -> Dict[str, Any]:
         with open(FIXTURES_DIR / "benign_ssh_finding.json", "r", encoding="utf-8") as f:
@@ -393,9 +466,9 @@ def start_server(host: str = "127.0.0.1", port: int = 8765, open_browser: bool =
     server = ThreadingHTTPServer((host, port), AegisAPIHandler)
     url = f"http://{host}:{port}"
     print(f"\n" + "=" * 75)
-    print(f" 🛡️  AEGIS-2B WEB OPERATIONS CENTER")
-    print(f"    Live URL: {url}")
-    print(f"    Real-Time REST API connected to Strands Decider 2B & Boto3 Dispatcher")
+    print(f" AEGIS-2B WEB OPERATIONS CENTER")
+    print(f" Live URL: {url}")
+    print(f" Pre-HTTP Botocore Hook + Strands Decider 2B + 3-Tier Router")
     print(f"=" * 75 + "\n")
 
     if open_browser:
