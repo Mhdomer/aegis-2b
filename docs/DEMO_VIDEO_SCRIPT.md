@@ -1,4 +1,4 @@
-# Aegis-2B — Official Demo Video Script & Storyboard
+# Aegis-2B - Official Demo Video Script & Storyboard
 > **Challenge:** AWS Builder Center "Strands Decider 2B" Challenge  
 > **Mandatory Tags:** `#strands-decider-2b` `#guardrails`  
 > **Target Duration:** Under 3 Minutes (Strict 180-second limit)  
@@ -44,14 +44,14 @@
   - **Scenario 1 (Benign SSH Brute Force):** Classified as `tier_0_rule` in **0.016 ms (`15.6 µs`)** with **96.5% confidence**.
   - Saves **1,280 Bedrock tokens (`$0.00`)** and renders the declarative `infra/security_groups.tf` `git diff` right in the UI and terminal.
 * `0:52 – 1:15`: Terminal runs `uv run aegis test-aws` (or `uv run aegis demo --compare-llm`).
-  - **Scenario 2 (Adversarial Prompt Injection):** Coerced `ec2.delete_security_group` call is intercepted inside Botocore's `before-parameter-build` hook in **0.505 ms**—raising `GuardrailBlockedError` before a single HTTP packet leaves the machine.
+  - **Scenario 2 (Adversarial Prompt Injection):** Coerced `ec2.delete_security_group` call is intercepted inside Botocore's `before-parameter-build` hook in **0.505 ms** - raising `GuardrailBlockedError` before a single HTTP packet leaves the machine.
 * `1:15 – 1:35`: Click **Case 3: Default Route Change (MFA Gate)** in the Web UI (or run `uv run aegis remediate --iac --interactive`).
   - High blast-radius `replace_route` (`0.0.0.0/0`) is halted (`VPC_WIDE`).
   - Enter Break-Glass MFA token `849201` -> verified with a signed `sha256:...` audit receipt and `infra/vpc_routing.tf` diff.
 
 #### Voiceover Narration:
 > *"Let's watch Aegis-2B in action against our live AWS account in `us-east-1`.*  
-> *First, when GuardDuty flags open SSH port 22, our 3-Tier Router classifies it as a Tier 0 surgical rule in 15.6 microseconds. It bypasses Bedrock completely—saving 1,280 tokens—permits the Boto3 fix, and generates a Terraform `git diff` so our Git repository never drifts from live AWS state.*  
+> *First, when GuardDuty flags open SSH port 22, our 3-Tier Router classifies it as a Tier 0 surgical rule in 15.6 microseconds. It bypasses Bedrock completely - saving 1,280 tokens - permits the Boto3 fix, and generates a Terraform `git diff` so our Git repository never drifts from live AWS state.*  
 > *Next, against an adversarial prompt injection trying to call `delete_security_group`, our Botocore `before-parameter-build` hook blocks the call in 0.505 milliseconds before any HTTP packet is serialized or sent to AWS.*  
 > *And when a proposed fix modifies a VPC-wide route table, Aegis-2B halts execution and enforces our Break-Glass MFA gate, requiring an operator token before proceeding."*
 
@@ -81,7 +81,7 @@
 
 #### Voiceover Narration:
 > *"Every benchmark in Aegis-2B is measured directly with `perf_counter_ns` against `us-east-1` with zero simulated sleep delays.*  
-> *Blocking a destructive call inside our local Botocore hook takes 0.505 milliseconds at P50—427 times faster than a warm HTTPS roundtrip to `us-east-1` and over 1,000 times faster than a cold TLS handshake, while eliminating 100% of LLM token costs on Tier 0 remediations."*
+> *Blocking a destructive call inside our local Botocore hook takes 0.505 milliseconds at P50 - 427 times faster than a warm HTTPS roundtrip to `us-east-1` and over 1,000 times faster than a cold TLS handshake, while eliminating 100% of LLM token costs on Tier 0 remediations."*
 
 ---
 

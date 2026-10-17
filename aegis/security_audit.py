@@ -1,5 +1,5 @@
 """
-Aegis-2B — Automated Security & Red-Team Self-Audit Suite
+Aegis-2B - Automated Security & Red-Team Self-Audit Suite
 Verifies that the circuit breaker resists 10 adversarial attack & failure vectors
 mapped to OWASP LLM Top 10, MITRE ATLAS, and AWS Well-Architected Security Pillar.
 """

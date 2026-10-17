@@ -1,5 +1,5 @@
 """
-Aegis-2B — Unified CLI Interface
+Aegis-2B - Unified CLI Interface
 Sub-Second Safety Circuit Breaker for Autonomous Cloud Ops Agents.
 """
 
@@ -26,7 +26,7 @@ def print_welcome_overview():
 
     console = Console()
     console.print()
-    console.print("[bold]aegis-2b[/bold] — local boto3 safety gate using Strands Decider 2B")
+    console.print("[bold]aegis-2b[/bold] - local boto3 safety gate using Strands Decider 2B")
     console.print("[dim]Intercepts destructive API calls, prompt injections, and wide blast-radius mutations before HTTP execution.[/dim]\n")
 
     cmd_table = Table(box=box.SIMPLE, padding=(0, 2), show_header=True)

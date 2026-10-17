@@ -1,5 +1,5 @@
 """
-Aegis-2B — AWS Action Dispatcher & Execution Sandbox
+Aegis-2B - AWS Action Dispatcher & Execution Sandbox
 Dispatches verified cloud remediation mutations via Boto3 only after
 Strands Decider 2B circuit breaker certification (Fail-Closed).
 """

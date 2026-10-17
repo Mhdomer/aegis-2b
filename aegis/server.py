@@ -1,5 +1,5 @@
 """
-Aegis-2B — Live Operations Server
+Aegis-2B - Live Operations Server
 Serves the real-time interactive Cyber-Ops Web Dashboard and provides
 REST API endpoints directly connected to Strands Decider 2B and the AWS Action Dispatcher.
 """
@@ -43,6 +43,12 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(UI_DIR), **kwargs)
+
+    def end_headers(self):
+        self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
+        super().end_headers()
 
     def do_GET(self):
         parsed = urlparse(self.path)
@@ -227,7 +233,7 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
             tool_parameters=scen["params"],
             blast_radius=BlastRadius(scen["blast_radius"]),
             is_destructive_action=scen["is_destructive"],
-            context_notes=f"{finding_title} — {finding_desc}",
+            context_notes=f"{finding_title} - {finding_desc}",
         )
 
         # 1. Real evaluate via Strands Decider 2B

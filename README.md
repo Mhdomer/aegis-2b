@@ -81,7 +81,7 @@ Aegis-2B solves this by splitting responsibilities into two distinct models:
 
 Aegis-2B includes an interactive scenario runner (`aegis demo`) and a browser-based Operations Center (`aegis ui`):
 
-### Scenario 1: Benign Auto-Remediation (SSH Brute Force — Fast Lane)
+### Scenario 1: Benign Auto-Remediation (SSH Brute Force - Fast Lane)
 - **Alert:** Multiple unauthorized SSH login attempts on port 22 (`sg-008c3f4e07a0ff172`).
 - **Router & Proposal:** Routed to `tier_0_rule` (`revoke_security_group_ingress`, **1,280 Bedrock tokens saved**, `$0.00`).
 - **Local Evaluation:** `PERMIT_AUTO_REMEDIATION` in **0.016 ms (`15.6 µs`)** (Confidence: **96.5%**, Blast Radius: `ISOLATED`), plus declarative `infra/security_groups.tf` `git diff`.
@@ -212,12 +212,12 @@ Because Aegis-2B is a security guardrail, it includes an automated **10-Vector R
 
 To prevent token waste and out-of-band Infrastructure-as-Code (IaC) state drift, Aegis-2B implements a **3-Stage Tiered Remediation Pipeline**:
 
-1. **Stage 1 — Ingestion:** Reads live AWS resources via `aws configure`, Security Hub ASFF JSON, or Prowler reports.
-2. **Stage 2 — Local 2B Triage & Routing (`patterns/guardrails/`):**
-   - `tier_0_rule` (**Direct Boto3 / Runbook — 0 LLM tokens, $0.00**): Known, isolated fixes (e.g., revoking world-open `0.0.0.0/0` on port 22) bypass Bedrock completely.
+1. **Stage 1 - Ingestion:** Reads live AWS resources via `aws configure`, Security Hub ASFF JSON, or Prowler reports.
+2. **Stage 2 - Local 2B Triage & Routing (`patterns/guardrails/`):**
+   - `tier_0_rule` (**Direct Boto3 / Runbook - 0 LLM tokens, $0.00**): Known, isolated fixes (e.g., revoking world-open `0.0.0.0/0` on port 22) bypass Bedrock completely.
    - `tier_1_fast` (**Amazon Nova Micro / Haiku**): Routine single-resource configuration fixes (~80% token reduction).
    - `tier_2_heavy` (**Claude 3.5 Sonnet + Break-Glass MFA**): High-blast-radius VPC routing, IAM policy mutations, or adversarial alerts.
-3. **Stage 3 — Dual Execution (`Boto3` + Declarative Terraform `git diff`):**
+3. **Stage 3 - Dual Execution (`Boto3` + Declarative Terraform `git diff`):**
    - Alongside every runtime Boto3 call, Aegis-2B generates a Terraform HCL patch (`infra/security_groups.tf`, `infra/vpc_routing.tf`, `infra/iam.tf`) so teams can commit the fix to Git without causing Terraform state drift.
 
 ```bash

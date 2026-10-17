@@ -1,5 +1,5 @@
 """
-Aegis-2B — 3-Stage Tiered Remediation & Terraform IaC Patch Engine
+Aegis-2B - 3-Stage Tiered Remediation & Terraform IaC Patch Engine
 Implements the Model Cascading / Decider Router pattern:
   Stage 1: Ingest posture findings (Live AWS Account, Security Hub ASFF, or Prowler JSON)
   Stage 2: Strands Decider 2B classifies {tier, risk_level, target_service} & gates safety
@@ -160,7 +160,7 @@ def run_remediate_cli(
             tool_parameters=f["params"],
             blast_radius=blast_enum,
             is_destructive_action=f["is_destructive"],
-            context_notes=f"{f['title']} — {f['description']}",
+            context_notes=f"{f['title']} - {f['description']}",
         )
         res = guardrail.evaluate(state)
         total_tokens_saved += res.estimated_tokens_saved
@@ -199,7 +199,7 @@ def run_remediate_cli(
 
     console.print()
     console.print(
-        f"[bold]aegis-2b tiered remediation router[/bold] — {len(evaluated_items)} findings classified · "
+        f"[bold]aegis-2b tiered remediation router[/bold] - {len(evaluated_items)} findings classified · "
         f"[green]~{total_tokens_saved:,} Bedrock tokens saved[/green] via local Decider 2B routing"
     )
 

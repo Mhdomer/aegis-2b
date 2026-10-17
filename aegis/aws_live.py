@@ -1,5 +1,5 @@
 """
-Aegis-2B — Live AWS Account Integration & Botocore Verification Engine
+Aegis-2B - Live AWS Account Integration & Botocore Verification Engine
 Connects directly to the user's `aws configure` credentials, IAM roles, or
 environment variables via boto3.Session() to scan real AWS infrastructure
 and test real Botocore before-parameter-build circuit breaking against live AWS APIs.
@@ -237,7 +237,7 @@ def run_live_aws_scan(
     except ClientError as exc:
         console.print(f"[yellow]  ! Could not describe EC2 Instances: {exc}[/yellow]")
 
-    # 4. Scan real IAM Roles ($0.00 IAM control-plane API — 100% free on all accounts)
+    # 4. Scan real IAM Roles ($0.00 IAM control-plane API - 100% free on all accounts)
     try:
         r_resp = iam.list_roles(MaxItems=25)
         roles = r_resp.get("Roles", [])
@@ -247,7 +247,7 @@ def run_live_aws_scan(
 
     # Summary inventory table
     inv_table = Table(
-        title=f"[bold white]Live AWS Resource Inventory ({conn['region']} — $0.00 Control-Plane APIs Only)[/bold white]",
+        title=f"[bold white]Live AWS Resource Inventory ({conn['region']} - $0.00 Control-Plane APIs Only)[/bold white]",
         box=box.ROUNDED,
         border_style="bright_blue",
     )
@@ -301,7 +301,7 @@ def run_live_aws_scan(
                 f"{res.latency_ms:.3f} ms",
             )
     else:
-        # Account has zero open 0.0.0.0/0 sensitive ports — show real guardrail checks on their actual default SG/VPC
+        # Account has zero open 0.0.0.0/0 sensitive ports - show real guardrail checks on their actual default SG/VPC
         sample_sg = sgs[0]["GroupId"] if sgs else "sg-default"
         sample_rtb = rtbs[0]["RouteTableId"] if rtbs else "rtb-default"
 
@@ -386,7 +386,7 @@ def run_live_aws_test(
                 f"and re-run [bold cyan]uv run aegis test-aws[/bold cyan].\n"
                 f"  • Running [bold bright_green]Real Botocore SDK Event-Hook Verification[/bold bright_green] on actual "
                 f"[cyan]boto3.client('ec2')[/cyan] & [cyan]boto3.client('iam')[/cyan] instances now (100% real CPU latency, zero sleep)...",
-                title="[bold yellow]AWS Credentials Not Configured — Running Real Boto3 SDK Hook Verification[/bold yellow]",
+                title="[bold yellow]AWS Credentials Not Configured - Running Real Boto3 SDK Hook Verification[/bold yellow]",
                 border_style="yellow",
                 box=box.ROUNDED,
             )

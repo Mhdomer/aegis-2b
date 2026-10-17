@@ -1,5 +1,5 @@
 """
-Aegis-2B — Unix/Linux Manual Page (aegis man)
+Aegis-2B - Unix/Linux Manual Page (aegis man)
 Provides comprehensive documentation for the Aegis-2B system, threat model,
 split-model architecture pattern, and command-line interface.
 """
@@ -14,7 +14,7 @@ console = Console()
 
 MAN_PAGE_CONTENT = """
 [bold cyan]NAME[/bold cyan]
-    [bold white]aegis[/bold white] — Sub-Second Safety Circuit Breaker for Autonomous Cloud Ops Agents
+    [bold white]aegis[/bold white] - Sub-Second Safety Circuit Breaker for Autonomous Cloud Ops Agents
 
 [bold cyan]SYNOPSIS[/bold cyan]
     [bold white]aegis[/bold white] [[bold green]COMMAND[/bold green]] [[[bold yellow]OPTIONS[/bold yellow]]]
@@ -127,7 +127,7 @@ def display_manual():
     """Displays the formatted Unix manual page in the terminal."""
     console.print(Panel(
         MAN_PAGE_CONTENT.strip(),
-        title="[bold white]AEGIS(1) — Linux User's Manual[/bold white]",
+        title="[bold white]AEGIS(1) - Linux User's Manual[/bold white]",
         border_style="cyan",
         box=box.ROUNDED,
     ))

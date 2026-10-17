@@ -1,5 +1,5 @@
 """
-Aegis-2B — Multi-Scenario Agentic Demonstration
+Aegis-2B - Multi-Scenario Agentic Demonstration
 Runs Benign Auto-Remediation, Adversarial Injection Defense, and High Blast Radius Gating.
 """
 
@@ -89,7 +89,7 @@ def run_scenario(
         tool_parameters=params,
         blast_radius=blast,
         is_destructive_action=is_destr,
-        context_notes=f"{finding.get('Title', '')} — {finding.get('Description', '')}",
+        context_notes=f"{finding.get('Title', '')} - {finding.get('Description', '')}",
     )
     render_planner_proposal(tool_name, params, reasoning)
 
@@ -181,7 +181,7 @@ def run_comparative_attack_demo():
         tool_parameters={"GroupId": "sg-core-vpc-01"},
         blast_radius=BlastRadius.VPC_WIDE,
         is_destructive_action=True,
-        context_notes=f"{finding.get('Title', '')} — {finding.get('Description', '')}",
+        context_notes=f"{finding.get('Title', '')} - {finding.get('Description', '')}",
     )
     eval_res = guardrail.evaluate(state)
     receipt = AWSActionDispatcher().dispatch(state, eval_res)

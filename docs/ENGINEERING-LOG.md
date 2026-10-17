@@ -1,4 +1,4 @@
-# Aegis-2B — Builder Log & Empirical Engineering Notes
+# Aegis-2B - Builder Log & Empirical Engineering Notes
 Author: Mohamed Makhlouf (Cloud & DevSecOps)
 
 ---
@@ -18,7 +18,7 @@ Aegis-2B solves these by placing a local, non-generative classifier and 3-tier r
 ## 2. Architecture & Design Decisions
 
 ### Decision 1: 3-Tier Decider Router (`tier_0_rule` / `tier_1_fast` / `tier_2_heavy`)
-- **`tier_0_rule` (Direct Boto3 / Runbook — `0` LLM tokens, `$0.00`):** Isolated, non-destructive fixes in `aegis.yaml` (`auto_permit`, such as `revoke_security_group_ingress` on port 22) bypass Bedrock completely.
+- **`tier_0_rule` (Direct Boto3 / Runbook - `0` LLM tokens, `$0.00`):** Isolated, non-destructive fixes in `aegis.yaml` (`auto_permit`, such as `revoke_security_group_ingress` on port 22) bypass Bedrock completely.
 - **`tier_1_fast` (Amazon Nova Micro / Haiku):** Routine single-resource configuration updates strip the multi-tool reasoning prompt and send only the compact state (~80% token reduction).
 - **`tier_2_heavy` (Claude 3.5 Sonnet + Break-Glass MFA Gate):** High-blast-radius VPC route changes (`replace_route`), IAM policy mutations (`attach_role_policy`), or alerts with prompt-injection anomalies halt immediately at the circuit breaker and require a human MFA token.
 
@@ -47,7 +47,7 @@ All numbers below were measured directly on our local host (**CachyOS Linux, Ker
 | **Direct Schema Evaluator (`guardrail.evaluate`)** | 200 runs | **0.016 ms** (`15.6 µs`) | **0.020 ms** (`20.0 µs`) | **0.037 ms** | Pure Python + Pydantic typed multi-head evaluation |
 | **Botocore Pre-HTTP Hook (`ec2.delete_security_group`)** | 100 runs | **0.505 ms** (`505.2 µs`) | **0.599 ms** (`599.0 µs`) | **6.770 ms** | Full `boto3` call -> `before-parameter-build` -> `GuardrailBlockedError` |
 | **Live AWS `us-east-1` Warm HTTPS RTT (`DescribeSecurityGroups`)** | 10 runs | **215.74 ms** | **241.60 ms** | **244.13 ms** | Reused TLS session pool to `ec2.us-east-1.amazonaws.com` |
-| **Live AWS `us-east-1` Cold TLS + SigV4 Handshake** | 1st call | **631.22 ms** | — | **669.89 ms** | Initial DNS + TCP + TLS 1.3 handshake + SigV4 signing |
+| **Live AWS `us-east-1` Cold TLS + SigV4 Handshake** | 1st call | **631.22 ms** | - | **669.89 ms** | Initial DNS + TCP + TLS 1.3 handshake + SigV4 signing |
 
 - **Empirical Speedup:** Blocking a destructive or prompt-injected call inside the local Botocore `before-parameter-build` hook (`0.505 ms` P50) is **427x faster** than a single warm HTTPS roundtrip to `us-east-1` (`215.74 ms`) and **1,054x faster** than a cold TLS connection (`631.22 ms`), with zero packets leaving the host.
 

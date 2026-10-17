@@ -1,5 +1,5 @@
 """
-Aegis-2B — Live Operations Terminal HUD
+Aegis-2B - Live Operations Terminal HUD
 High-impact visual telemetry for demo videos and live CLI runs using Python Rich.
 """
 
@@ -25,7 +25,7 @@ console = Console(highlight=False)
 
 
 def render_banner():
-    console.print("\n[bold]aegis-2b[/bold] — split-model boto3 safety gate (Bedrock planner + Strands Decider 2B)")
+    console.print("\n[bold]aegis-2b[/bold] - split-model boto3 safety gate (Bedrock planner + Strands Decider 2B)")
     console.print("[dim]Fail-closed threshold >= 85.0% · $0.00 local evaluation · pre-HTTP Botocore hook[/dim]\n")
 
 

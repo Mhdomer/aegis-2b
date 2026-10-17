@@ -1,5 +1,5 @@
 """
-Aegis-2B — Empirical Benchmark Suite
+Aegis-2B - Empirical Benchmark Suite
 Measures real local CPU/SDK interception latency, real AWS us-east-1 HTTPS roundtrip latency,
 and real payload token counts from scenarios/fixtures/*.json. Zero simulated sleep delays.
 """
@@ -136,7 +136,7 @@ def run_benchmark(iterations: int = 200, measure_live_aws: bool = True):
     avg_cost_1k = round(statistics.mean(s["cost_per_1k_usd"] for s in token_samples), 2)
 
     console.print(
-        f"\n[bold]aegis-2b empirical benchmark[/bold] — {iterations} local evaluations + 100 Botocore SDK hooks "
+        f"\n[bold]aegis-2b empirical benchmark[/bold] - {iterations} local evaluations + 100 Botocore SDK hooks "
         f"(zero simulated sleep)"
     )
 

@@ -1,5 +1,5 @@
 """
-Aegis-2B — DeciderCloudGuardrail
+Aegis-2B - DeciderCloudGuardrail
 A fast (~115ms) safety circuit breaker that checks agent actions
 before they touch live AWS resources, using Strands Decider 2B.
 """

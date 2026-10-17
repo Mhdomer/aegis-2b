@@ -1,5 +1,5 @@
 """
-Aegis-2B — Interactive Terminal Cockpit
+Aegis-2B - Interactive Terminal Cockpit
 A full-screen terminal operations dashboard for autonomous AWS cloud safety.
 Features arrow-key navigation (↑/↓/j/k), resource inspection ([Enter]/[d]),
 multi-tab views (AWS Resources, CloudWatch Logs, VPC Topology), and live hotkeys.
@@ -198,7 +198,7 @@ class AegisCockpit:
             tool_parameters=params,
             blast_radius=blast,
             is_destructive_action=is_destr,
-            context_notes=f"{finding.get('Title', '')} — {finding.get('Description', '')}",
+            context_notes=f"{finding.get('Title', '')} - {finding.get('Description', '')}",
         )
 
         decider_res = self.guardrail.evaluate(state)
