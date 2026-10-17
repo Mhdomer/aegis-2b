@@ -55,4 +55,12 @@ CLAUDE.md
 docs/internal/
 *PHASE_0_PLAN*.md
 
+# Video & Audio Assets
+media/
+*.mp4
+*.mp3
+*.wav
+*.webm
+
+
 
