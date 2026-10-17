@@ -56,8 +56,8 @@ Aegis-2B solves this by splitting responsibilities into two distinct models:
 
 ## System Architecture
 
-![Aegis-2B Production AWS Architecture](docs/images/aegis-architecture.png)
-<p align="center"><em>Editable Architecture Sources: <a href="docs/images/aegis-aws-architecture.drawio">Draw.io (diagrams.net)</a> · <a href="docs/images/aegis-aws-architecture.excalidraw">Excalidraw JSON</a> · <a href="docs/images/aegis-aws-architecture.svg">Vector SVG</a></em></p>
+![Aegis-2B Production AWS Architecture](docs/images/aegis-aws-architecture.drawio.png)
+<p align="center"><em>Architecture Views: <a href="docs/images/aegis-aws-architecture.drawio.png">AWS Component Icons (Draw.io)</a> · <a href="docs/images/aegis-aws-architecture-exceldraw.png">Whiteboard Sketch (Excalidraw)</a> · Source Files: <a href="docs/images/aegis-aws-architecture.drawio">.drawio</a> / <a href="docs/images/aegis-aws-architecture.excalidraw">.excalidraw</a></em></p>
 
 ![Aegis-2B Web Operations Center](docs/images/aegis-web-dashboard.png)
 

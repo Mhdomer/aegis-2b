@@ -1,132 +1,108 @@
-<mxfile host="app.diagrams.net" modified="2026-10-17T20:20:00.000Z" agent="Aegis-2B Generator" version="24.0.0" type="device">
+<mxfile host="app.diagrams.net" agent="Aegis-2B Generator">
   <diagram id="aegis-aws-architecture" name="Aegis-2B Production Architecture">
-    <mxGraphModel dx="1420" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+    <mxGraphModel dx="1553" dy="851" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-
-        <!-- AWS Region Box -->
-        <mxCell id="region_box" value="AWS Cloud (Region: us-east-1)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#CBD5E1;fontStyle=1;fontSize=13;fontColor=#0F172A;startSize=30;rounded=1;arcSize=4;" vertex="1" parent="1">
-          <mxGeometry x="40" y="40" width="1500" height="800" as="geometry" />
+        <mxCell id="region_box" parent="1" style="swimlane;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#CBD5E1;fontStyle=1;fontSize=13;fontColor=#0F172A;startSize=30;rounded=1;arcSize=4;" value="AWS Cloud (Region: us-east-1)" vertex="1">
+          <mxGeometry height="800" width="1500" x="40" y="40" as="geometry" />
         </mxCell>
-
-        <!-- ZONE 1: Security Alert Ingestion -->
-        <mxCell id="zone1" value="1. Security Alert Ingestion &amp; Planning" style="swimlane;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E2E8F0;fontStyle=1;fontSize=12;fontColor=#1E293B;startSize=26;rounded=1;" vertex="1" parent="region_box">
-          <mxGeometry x="20" y="50" width="280" height="720" as="geometry" />
+        <mxCell id="zone1" parent="region_box" style="swimlane;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E2E8F0;fontStyle=1;fontSize=12;fontColor=#1E293B;startSize=26;rounded=1;" value="1. Security Alert Ingestion &amp; Planning" vertex="1">
+          <mxGeometry height="720" width="280" x="20" y="50" as="geometry" />
         </mxCell>
-
-        <!-- AWS Security Hub -->
-        <mxCell id="node_sechub" value="AWS Security Hub&#xa;ASFF Finding Stream" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=1;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.security_hub;" vertex="1" parent="zone1">
-          <mxGeometry x="100" y="50" width="70" height="70" as="geometry" />
+        <mxCell id="node_sechub" parent="zone1" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=1;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.security_hub;" value="AWS Security Hub&#xa;ASFF Finding Stream" vertex="1">
+          <mxGeometry height="70" width="70" x="100" y="50" as="geometry" />
         </mxCell>
-
-        <!-- Amazon GuardDuty -->
-        <mxCell id="node_guardduty" value="Amazon GuardDuty&#xa;Threat Intelligence" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=1;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.guardduty;" vertex="1" parent="zone1">
-          <mxGeometry x="100" y="170" width="70" height="70" as="geometry" />
+        <mxCell id="node_guardduty" parent="zone1" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=1;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.guardduty;" value="Amazon GuardDuty&#xa;Threat Intelligence" vertex="1">
+          <mxGeometry height="70" width="70" x="100" y="170" as="geometry" />
         </mxCell>
-
-        <!-- Amazon EventBridge -->
-        <mxCell id="node_eventbridge" value="Amazon EventBridge&#xa;Rules &amp; Event Bus" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=1;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.eventbridge;" vertex="1" parent="zone1">
-          <mxGeometry x="100" y="290" width="70" height="70" as="geometry" />
+        <mxCell id="node_eventbridge" parent="zone1" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=1;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.eventbridge;" value="Amazon EventBridge&#xa;Rules &amp; Event Bus" vertex="1">
+          <mxGeometry height="70" width="70" x="100" y="290" as="geometry" />
         </mxCell>
-
-        <!-- Amazon Bedrock -->
-        <mxCell id="node_bedrock" value="Amazon Bedrock&#xa;Claude 3.5 Sonnet / Nova&#xa;(Cognitive Planner)" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#0052CC;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=1;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.generative_ai;" vertex="1" parent="zone1">
-          <mxGeometry x="100" y="430" width="70" height="70" as="geometry" />
+        <mxCell id="node_bedrock" parent="zone1" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#0052CC;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=1;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.generative_ai;" value="Amazon Bedrock&#xa;Claude 3.5 Sonnet / Nova&#xa;(Cognitive Planner)" vertex="1">
+          <mxGeometry height="70" width="70" x="100" y="430" as="geometry" />
         </mxCell>
-
-        <!-- Vulnerability note -->
-        <mxCell id="note_bedrock_risk" value="&lt;b&gt;Bedrock Tradeoff:&lt;/b&gt;&#xa;• 1,840ms Latency&#xa;• $6.30/1k Findings&#xa;• Prompt Injection Risk" style="text;html=1;strokeColor=#FED7AA;fillColor=#FFF7ED;align=left;verticalAlign=middle;spacingLeft=6;rounded=1;fontSize=10;fontColor=#9A3412;" vertex="1" parent="zone1">
-          <mxGeometry x="20" y="540" width="240" height="80" as="geometry" />
+        <mxCell id="note_bedrock_risk" parent="zone1" style="text;html=1;strokeColor=#FED7AA;fillColor=#FFF7ED;align=left;verticalAlign=middle;spacingLeft=6;rounded=1;fontSize=10;fontColor=#9A3412;" value="&lt;b&gt;Bedrock Tradeoff:&lt;/b&gt;&#xa;• 1,840ms Latency&#xa;• $6.30/1k Findings&#xa;• Prompt Injection Risk" vertex="1">
+          <mxGeometry height="80" width="240" x="20" y="570" as="geometry" />
         </mxCell>
-
-        <!-- ZONE 2: Aegis-2B Circuit Breaker -->
-        <mxCell id="zone2" value="2. Aegis-2B Sub-Second Safety Circuit Breaker (Local Host / Sidecar Container)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0F172A;fontStyle=1;fontSize=13;fontColor=#0F172A;startSize=30;rounded=1;strokeWidth=2;" vertex="1" parent="region_box">
-          <mxGeometry x="340" y="50" width="620" height="720" as="geometry" />
+        <mxCell id="zone2" parent="region_box" style="swimlane;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0F172A;fontStyle=1;fontSize=13;fontColor=#0F172A;startSize=30;rounded=1;strokeWidth=2;" value="2. Aegis-2B Sub-Second Safety Circuit Breaker (Local Host / Sidecar Container)" vertex="1">
+          <mxGeometry height="720" width="620" x="340" y="50" as="geometry" />
         </mxCell>
-
-        <!-- 3-Tier Router -->
-        <mxCell id="router_box" value="3-Tier Remediation Router (patterns/guardrails/)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#CBD5E1;fontStyle=1;fontSize=11;fontColor=#0F172A;startSize=24;rounded=1;" vertex="1" parent="zone2">
-          <mxGeometry x="20" y="45" width="580" height="95" as="geometry" />
+        <mxCell id="router_box" parent="zone2" style="swimlane;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#CBD5E1;fontStyle=1;fontSize=11;fontColor=#0F172A;startSize=24;rounded=1;" value="3-Tier Remediation Router (patterns/guardrails/)" vertex="1">
+          <mxGeometry height="95" width="580" x="20" y="45" as="geometry" />
         </mxCell>
-        <mxCell id="t0" value="&lt;b&gt;Tier 0: Direct Rule&lt;/b&gt;&#xa;0 Tokens · $0.00 Cost&#xa;revoke_sg_ingress" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDF4;strokeColor=#86EFAC;fontSize=10;fontColor=#15803D;" vertex="1" parent="router_box">
-          <mxGeometry x="15" y="32" width="170" height="50" as="geometry" />
+        <mxCell id="t0" parent="router_box" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDF4;strokeColor=#86EFAC;fontSize=10;fontColor=#15803D;" value="&lt;b&gt;Tier 0: Direct Rule&lt;/b&gt;&#xa;0 Tokens · $0.00 Cost&#xa;revoke_sg_ingress" vertex="1">
+          <mxGeometry height="50" width="170" x="15" y="32" as="geometry" />
         </mxCell>
-        <mxCell id="t1" value="&lt;b&gt;Tier 1: Nova Micro&lt;/b&gt;&#xa;~80% Token Reduction&#xa;Single-resource fixes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF6FF;strokeColor=#BFDBFE;fontSize=10;fontColor=#1D4ED8;" vertex="1" parent="router_box">
-          <mxGeometry x="205" y="32" width="170" height="50" as="geometry" />
+        <mxCell id="t1" parent="router_box" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF6FF;strokeColor=#BFDBFE;fontSize=10;fontColor=#1D4ED8;" value="&lt;b&gt;Tier 1: Nova Micro&lt;/b&gt;&#xa;~80% Token Reduction&#xa;Single-resource fixes" vertex="1">
+          <mxGeometry height="50" width="170" x="205" y="32" as="geometry" />
         </mxCell>
-        <mxCell id="t2" value="&lt;b&gt;Tier 2: Claude 3.5&lt;/b&gt;&#xa;Cognitive Reasoning&#xa;Multi-resource / IAM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDF4FF;strokeColor=#F0ABFC;fontSize=10;fontColor=#86198F;" vertex="1" parent="router_box">
-          <mxGeometry x="395" y="32" width="170" height="50" as="geometry" />
+        <mxCell id="t2" parent="router_box" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDF4FF;strokeColor=#F0ABFC;fontSize=10;fontColor=#86198F;" value="&lt;b&gt;Tier 2: Claude 3.5&lt;/b&gt;&#xa;Cognitive Reasoning&#xa;Multi-resource / IAM" vertex="1">
+          <mxGeometry height="50" width="170" x="395" y="32" as="geometry" />
         </mxCell>
-
-        <!-- Botocore Pre-HTTP Hook -->
-        <mxCell id="hook_box" value="Botocore Pre-HTTP Hook Interceptor (before-parameter-build.*.*)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#CBD5E1;fontStyle=1;fontSize=11;fontColor=#0F172A;startSize=24;rounded=1;" vertex="1" parent="zone2">
-          <mxGeometry x="20" y="155" width="580" height="240" as="geometry" />
+        <mxCell id="hook_box" parent="zone2" style="swimlane;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#CBD5E1;fontStyle=1;fontSize=11;fontColor=#0F172A;startSize=24;rounded=1;" value="Botocore Pre-HTTP Hook Interceptor (before-parameter-build.*.*)" vertex="1">
+          <mxGeometry height="240" width="580" x="20" y="155" as="geometry" />
         </mxCell>
-
-        <mxCell id="norm_box" value="&lt;b&gt;Input Normalization:&lt;/b&gt; Zero-Width Unicode (U+200B..F) &amp; URL-encoded %30.0.0.0/0 Normalization (MITRE ATLAS AML.T0051)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E2E8F0;fontSize=10;fontColor=#334155;" vertex="1" parent="hook_box">
-          <mxGeometry x="15" y="32" width="550" height="32" as="geometry" />
+        <mxCell id="norm_box" parent="hook_box" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E2E8F0;fontSize=10;fontColor=#334155;" value="&lt;b&gt;Input Normalization:&lt;/b&gt; Zero-Width Unicode (U+200B..F) &amp; URL-encoded %30.0.0.0/0 Normalization (MITRE ATLAS AML.T0051)" vertex="1">
+          <mxGeometry height="32" width="550" x="15" y="32" as="geometry" />
         </mxCell>
-
-        <mxCell id="decider_box" value="&lt;b&gt;Strands Decider 2B (~115ms Local Calibrated Classifier)&lt;/b&gt;&#xa;&lt;i&gt;&quot;Does this proposed remediation mutate stateful resources or exceed least privilege?&quot;&lt;/i&gt;&#xa;Evaluates 5-Heads: Destructive Verbs | IAM Escalation | 0.0.0.0/0 Ingress | Blast Radius | Prompt Injection" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0F9FF;strokeColor=#BAE6FD;fontSize=10.5;fontColor=#0369A1;" vertex="1" parent="hook_box">
-          <mxGeometry x="15" y="75" width="550" height="70" as="geometry" />
+        <mxCell id="decider_box" parent="hook_box" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0F9FF;strokeColor=#BAE6FD;fontSize=10.5;fontColor=#0369A1;" value="&lt;b&gt;Strands Decider 2B (~115ms Local Calibrated Classifier)&lt;/b&gt;&#xa;&lt;i&gt;&quot;Does this proposed remediation mutate stateful resources or exceed least privilege?&quot;&lt;/i&gt;&#xa;Evaluates 5-Heads: Destructive Verbs | IAM Escalation | 0.0.0.0/0 Ingress | Blast Radius | Prompt Injection" vertex="1">
+          <mxGeometry height="70" width="550" x="15" y="75" as="geometry" />
         </mxCell>
-
-        <!-- Fail Closed Boundary Paths -->
-        <mxCell id="path_halt" value="&lt;b&gt;FAIL CLOSED: HALT&lt;/b&gt;&#xa;• Destructive Verb Detected&#xa;• Low Confidence (&lt; 0.85)&#xa;• Prompt Injection Identified&#xa;&lt;b&gt;Result:&lt;/b&gt; Demands Break-Glass MFA&#xa;&lt;font color=&quot;#DC2626&quot;&gt;&lt;b&gt;ZERO Packets Sent to AWS&lt;/b&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF2F2;strokeColor=#F87171;fontSize=10.5;fontColor=#991515;" vertex="1" parent="zone2">
-          <mxGeometry x="20" y="415" width="275" height="135" as="geometry" />
+        <mxCell id="path_halt" parent="zone2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF2F2;strokeColor=#F87171;fontSize=10.5;fontColor=#991515;" value="&lt;b&gt;FAIL CLOSED: HALT&lt;/b&gt;&#xa;• Destructive Verb Detected&#xa;• Low Confidence (&lt; 0.85)&#xa;• Prompt Injection Identified&#xa;&lt;b&gt;Result:&lt;/b&gt; Demands Break-Glass MFA&#xa;&lt;font color=&quot;#DC2626&quot;&gt;&lt;b&gt;ZERO Packets Sent to AWS&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="135" width="275" x="20" y="415" as="geometry" />
         </mxCell>
-
-        <mxCell id="path_permit" value="&lt;b&gt;PERMIT AUTO-REMEDIATE&lt;/b&gt;&#xa;• Bounded &amp; Isolated Resource&#xa;• Confidence &gt;= 0.85&#xa;• Safe Least-Privilege Action&#xa;&lt;b&gt;Result:&lt;/b&gt; Dispatches Boto3 Mutation&#xa;&lt;font color=&quot;#15803D&quot;&gt;&lt;b&gt;Emits SHA-256 HMAC Receipt&lt;/b&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDF4;strokeColor=#4ADE80;fontSize=10.5;fontColor=#14532D;" vertex="1" parent="zone2">
-          <mxGeometry x="325" y="415" width="275" height="135" as="geometry" />
+        <mxCell id="path_permit" parent="zone2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDF4;strokeColor=#4ADE80;fontSize=10.5;fontColor=#14532D;" value="&lt;b&gt;PERMIT AUTO-REMEDIATE&lt;/b&gt;&#xa;• Bounded &amp; Isolated Resource&#xa;• Confidence &gt;= 0.85&#xa;• Safe Least-Privilege Action&#xa;&lt;b&gt;Result:&lt;/b&gt; Dispatches Boto3 Mutation&#xa;&lt;font color=&quot;#15803D&quot;&gt;&lt;b&gt;Emits SHA-256 HMAC Receipt&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="135" width="275" x="325" y="415" as="geometry" />
         </mxCell>
-
-        <!-- Declarative IaC -->
-        <mxCell id="iac_box" value="&lt;b&gt;Declarative Terraform IaC Patch Engine &amp; State Rollback Engine&lt;/b&gt;&#xa;Generates git diff patches against infra/*.tf to prevent out-of-band state drift&#xa;Rollback engine allows inverting previous actions using SHA-256 receipts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAF5FF;strokeColor=#D8B4FE;fontSize=10.5;fontColor=#581C87;" vertex="1" parent="zone2">
-          <mxGeometry x="20" y="570" width="580" height="70" as="geometry" />
+        <mxCell id="iac_box" parent="zone2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAF5FF;strokeColor=#D8B4FE;fontSize=10.5;fontColor=#581C87;" value="&lt;b&gt;Declarative Terraform IaC Patch Engine &amp; State Rollback Engine&lt;/b&gt;&#xa;Generates git diff patches against infra/*.tf to prevent out-of-band state drift&#xa;Rollback engine allows inverting previous actions using SHA-256 receipts" vertex="1">
+          <mxGeometry height="70" width="580" x="20" y="570" as="geometry" />
         </mxCell>
-
-        <!-- ZONE 3: Production AWS Cloud Targets -->
-        <mxCell id="zone3" value="3. Target AWS Infrastructure (Production VPC)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8B5CF6;fontStyle=1;fontSize=12;fontColor=#1E293B;startSize=26;rounded=1;strokeDasharray=4 4;" vertex="1" parent="region_box">
-          <mxGeometry x="1000" y="50" width="460" height="720" as="geometry" />
+        <mxCell id="zone3" parent="region_box" style="swimlane;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8B5CF6;fontStyle=1;fontSize=12;fontColor=#1E293B;startSize=26;rounded=1;strokeDasharray=4 4;" value="3. Target AWS Infrastructure (Production VPC)" vertex="1">
+          <mxGeometry height="720" width="460" x="1000" y="50" as="geometry" />
         </mxCell>
-
-        <!-- EC2 SG -->
-        <mxCell id="node_ec2" value="Amazon EC2 Security Groups&#xa;sg-008c3f4e07a0ff172 (Port 22 Revoked)" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#FF9900;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=1;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.ec2;" vertex="1" parent="zone3">
-          <mxGeometry x="50" y="50" width="60" height="60" as="geometry" />
+        <mxCell id="node_ec2" parent="zone3" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#FF9900;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=1;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.ec2;" value="Amazon EC2 Security Groups&#xa;sg-008c3f4e07a0ff172 (Port 22 Revoked)" vertex="1">
+          <mxGeometry height="60" width="60" x="210" y="50" as="geometry" />
         </mxCell>
-
-        <!-- VPC Route Table -->
-        <mxCell id="node_vpc" value="Amazon VPC Route Tables&#xa;rtb-067d049b3b998fcd3 (Default Route Gated)" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=1;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.route_table;" vertex="1" parent="zone3">
-          <mxGeometry x="50" y="180" width="60" height="60" as="geometry" />
+        <mxCell id="node_gitops" parent="zone3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0F172A;strokeColor=none;fontSize=10.5;fontColor=#FFFFFF;" value="&lt;b&gt;GitOps / Terraform State (Git Repository)&lt;/b&gt;&#xa;infra/security_groups.tf · infra/vpc_routing.tf&#xa;&lt;font color=&quot;#15803D&quot;&gt;Keeps Terraform HCL synced with live cloud reality&lt;/font&gt;" vertex="1">
+          <mxGeometry height="70" width="400" x="30" y="580" as="geometry" />
         </mxCell>
-
-        <!-- IAM Role -->
-        <mxCell id="node_iam" value="AWS Identity &amp; Access Mgmt (IAM)&#xa;Role: AWSServiceRoleForAccessAnalyzer" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#CC2264;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=1;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.iam;" vertex="1" parent="zone3">
-          <mxGeometry x="50" y="310" width="60" height="60" as="geometry" />
+        <mxCell id="node_vpc" parent="zone3" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=1;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.route_table;" value="Amazon VPC Route Tables&#xa;rtb-067d049b3b998fcd3 (Default Route Gated)" vertex="1">
+          <mxGeometry height="60" width="60" x="210" y="210" as="geometry" />
         </mxCell>
-
-        <!-- Amazon S3 -->
-        <mxCell id="node_s3" value="Amazon S3 Data Buckets&#xa;patient-records-prod (Protected from Delete)" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#3F8624;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=1;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.s3;" vertex="1" parent="zone3">
-          <mxGeometry x="50" y="440" width="60" height="60" as="geometry" />
-        </mxCell>
-
-        <!-- GitOps State -->
-        <mxCell id="node_gitops" value="&lt;b&gt;GitOps / Terraform State (Git Repository)&lt;/b&gt;&#xa;infra/security_groups.tf · infra/vpc_routing.tf&#xa;&lt;font color=&quot;#15803D&quot;&gt;Keeps Terraform HCL synced with live cloud reality&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0F172A;strokeColor=none;fontSize=10.5;fontColor=#FFFFFF;" vertex="1" parent="zone3">
-          <mxGeometry x="30" y="580" width="400" height="70" as="geometry" />
-        </mxCell>
-
-        <!-- CONNECTING EDGES -->
-        <mxCell id="edge1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2563EB;strokeWidth=2;" edge="1" parent="region_box" source="node_eventbridge" target="zone2">
+        <mxCell id="edge2" edge="1" parent="zone3" source="node_vpc" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#15803D;strokeWidth=3;" target="node_ec2">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="edge2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#15803D;strokeWidth=3;" edge="1" parent="region_box" source="path_permit" target="node_ec2">
+        <mxCell id="edge1" edge="1" parent="region_box" source="node_eventbridge" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2563EB;strokeWidth=2;" target="zone2">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="edge3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#7C3AED;strokeWidth=2;" edge="1" parent="region_box" source="iac_box" target="node_gitops">
+        <mxCell id="edge3" edge="1" parent="region_box" source="iac_box" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#7C3AED;strokeWidth=2;" target="node_gitops">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
+        <mxCell id="yyuzuvxaPqsYpm1O3sWh-1" edge="1" parent="region_box" source="node_iam" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#15803D;strokeWidth=3;" target="node_vpc" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="980" y="573" as="sourcePoint" />
+            <mxPoint x="1280" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yyuzuvxaPqsYpm1O3sWh-2" edge="1" parent="region_box" source="node_s3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#15803D;strokeWidth=3;" target="node_iam" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="980" y="573" as="sourcePoint" />
+            <mxPoint x="1280" y="359" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="node_iam" parent="region_box" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#CC2264;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=1;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.iam;" value="AWS Identity &amp; Access Mgmt (IAM)&#xa;Role: AWSServiceRoleForAccessAnalyzer" vertex="1">
+          <mxGeometry height="60" width="60" x="1210" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="yyuzuvxaPqsYpm1O3sWh-3" edge="1" parent="region_box" source="path_permit" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#15803D;strokeWidth=3;" target="node_s3" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="980" y="573" as="sourcePoint" />
+            <mxPoint x="1280" y="500" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="node_s3" parent="region_box" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#3F8624;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=1;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.s3;" value="Amazon S3 Data Buckets&#xa;patient-records-prod (Protected from Delete)" vertex="1">
+          <mxGeometry height="60" width="60" x="1090" y="502.5" as="geometry" />
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
