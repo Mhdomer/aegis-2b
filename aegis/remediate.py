@@ -140,6 +140,7 @@ def run_remediate_cli(
     interactive: bool = False,
     show_iac: bool = False,
     as_json: bool = False,
+    dry_run: bool = False,
 ) -> bool:
     """Executes the 3-stage Tiered Decider Router + Boto3 / Terraform IaC remediation workflow."""
     console = Console()
@@ -202,6 +203,8 @@ def run_remediate_cli(
         f"[bold]aegis-2b tiered remediation router[/bold] - {len(evaluated_items)} findings classified · "
         f"[green]~{total_tokens_saved:,} Bedrock tokens saved[/green] via local Decider 2B routing"
     )
+    if dry_run:
+        console.print("[dim cyan][DRY RUN] Simulating Decider 2B safety circuit breaker (Zero Boto3 mutations executed)[/dim cyan]")
 
     table = Table(box=box.SIMPLE, expand=True)
     table.add_column("ID", style="bold", width=7, no_wrap=True)

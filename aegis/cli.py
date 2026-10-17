@@ -393,10 +393,11 @@ def main():
         "remediate",
         help="Run 3-tier Decider 2B routing & remediate findings via Boto3 or Terraform git diff",
     )
-    remediate_parser.add_argument("--input", type=str, default=None, help="Path to Security Hub or Prowler JSON findings file")
+    remediate_parser.add_argument("--input", "--alert", dest="input", type=str, default=None, help="Path to Security Hub, GuardDuty, or Prowler JSON findings file")
     remediate_parser.add_argument("--profile", type=str, default=None, help="AWS CLI profile name")
     remediate_parser.add_argument("--region", type=str, default=None, help="AWS region override")
     remediate_parser.add_argument("--interactive", action="store_true", help="Interactive [y/N/diff/iac] approval prompt for each finding")
+    remediate_parser.add_argument("--dry-run", action="store_true", help="Evaluate alert with Decider 2B without executing any Boto3 mutation")
     remediate_parser.add_argument("--iac", action="store_true", help="Output declarative Terraform HCL git diffs to prevent state drift")
     remediate_parser.add_argument("--json", action="store_true", help="Output structured JSON router schema")
 
@@ -519,6 +520,7 @@ def main():
             interactive=args.interactive,
             show_iac=args.iac,
             as_json=args.json,
+            dry_run=args.dry_run,
         )
 
     elif args.command == "audit":

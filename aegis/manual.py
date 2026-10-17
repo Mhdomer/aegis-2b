@@ -90,8 +90,8 @@ MAN_PAGE_CONTENT = """
 
     [bold green]benchmark[/bold green] [[[bold yellow]--iterations[/bold yellow] N]]
         Run empirical latency and token cost benchmarks (`time.perf_counter_ns()`) comparing
-        local schema evaluation (`0.016 ms` P50) and Botocore pre-HTTP hook interception
-        (`0.505 ms` P50) against live AWS `us-east-1` HTTPS RTT (`215.74 ms` warm / `631.22 ms` cold).
+        local schema evaluation and Botocore pre-HTTP hook interception
+        against live AWS `us-east-1` HTTPS RTT measurements.
 
     [bold green]man[/bold green]
         Display this Unix/Linux manual page.
