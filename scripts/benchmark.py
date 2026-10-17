@@ -97,7 +97,10 @@ def run_benchmark(iterations: int = 200, measure_live_aws: bool = True):
     p99_eval_ms = max(eval_latencies_ms)
 
     # 2. Measure real Botocore before-parameter-build SDK interception
-    ec2_protected = guardrail.protect_boto3_client(boto3.client("ec2", region_name="us-east-1"))
+    ec2_protected = guardrail.protect_boto3_client(
+        boto3.client("ec2", region_name="us-east-1"),
+        emit_ui_telemetry=False,
+    )
     hook_latencies_ms = []
     for _ in range(100):
         t0 = time.perf_counter_ns()

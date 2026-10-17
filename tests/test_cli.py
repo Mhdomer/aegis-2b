@@ -118,3 +118,42 @@ def test_remediate_cli_json_output(capsys):
     assert "--- a/infra/security_groups.tf" in first["terraform_diff"]
 
 
+def test_server_live_cli_execution_and_benchmark_endpoints():
+    handler = object.__new__(AegisAPIHandler)
+
+    cmds = [
+        "aegis remediate --iac",
+        "aegis audit",
+        "aegis test-aws",
+        "aegis demo --compare-llm",
+        "aegis protect --enforce",
+        "aegis benchmark",
+    ]
+    for cmd_str in cmds:
+        res = handler._handle_cli_execute(cmd_str)
+        assert "output" in res
+        assert len(res["output"]) > 40
+        assert res["elapsed_ms"] >= 0.0
+
+    bench = handler._handle_benchmark()
+    assert bench["iterations"] == 50
+    assert bench["p50_decider"] > 0
+    assert bench["p99_decider"] >= bench["p50_decider"]
+    assert bench["avg_tokens_per_finding"] > 1000
+    assert bench["cost_bedrock_1k"].startswith("$")
+    assert bench["cost_decider_1k"] == "$0.00"
+
+
+def test_security_self_audit_10_vectors():
+    from aegis.security_audit import run_security_self_audit_data
+
+    audit = run_security_self_audit_data()
+    assert audit["total_count"] == 10
+    assert audit["passed_count"] == 10
+    assert audit["status"] == "HARDENED_PASS"
+    for check in audit["checks"]:
+        assert check["passed"] is True
+        assert check["latency_ms"] >= 0.0
+
+
+

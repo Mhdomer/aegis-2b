@@ -475,6 +475,7 @@ class DeciderCloudGuardrail:
         mfa_token: Optional[str] = None,
         mfa_callback: Optional[Callable[[DeciderState, DeciderResult], Optional[str]]] = None,
         on_decision: Optional[Callable[[DeciderState, DeciderResult, bool], None]] = None,
+        emit_ui_telemetry: bool = True,
     ) -> Any:
         """
         Attach Aegis-2B directly to a real boto3 client via Botocore's event system.
@@ -566,7 +567,8 @@ class DeciderCloudGuardrail:
                         "permitted": False,
                     }
                     self.interception_log.append(record)
-                    self._emit_telemetry_to_ui(state, result, False, f"{service_name}:{op_pascal}")
+                    if emit_ui_telemetry:
+                        self._emit_telemetry_to_ui(state, result, False, f"{service_name}:{op_pascal}")
                     if on_decision is not None:
                         on_decision(state, result, False)
                     raise GuardrailBlockedError(
@@ -586,7 +588,8 @@ class DeciderCloudGuardrail:
                 "permitted": True,
             }
             self.interception_log.append(record)
-            self._emit_telemetry_to_ui(state, result, True, f"{service_name}:{op_pascal}")
+            if emit_ui_telemetry:
+                self._emit_telemetry_to_ui(state, result, True, f"{service_name}:{op_pascal}")
             if on_decision is not None:
                 on_decision(state, result, True)
 

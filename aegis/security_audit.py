@@ -192,12 +192,13 @@ def run_security_self_audit_data() -> Dict[str, Any]:
     })
 
     # 8. Invariant 1A: Low-Confidence (<0.85) Automatic Downgrade to Fail-Closed
+    t8_ns = time.perf_counter_ns()
     low_conf_guard = DeciderCloudGuardrail(
         risk_threshold=0.85,
         inference_engine=lambda st, q: DeciderResult(
             action=GuardrailAction.PERMIT_AUTO_REMEDIATION,
             confidence=0.62,
-            latency_ms=0.05,
+            latency_ms=max(0.001, round((time.perf_counter_ns() - t8_ns) / 1_000_000.0, 3)),
             reasoning_code="AMBIGUOUS_SCORE",
         ),
     )
@@ -235,7 +236,8 @@ def run_security_self_audit_data() -> Dict[str, Any]:
     from botocore.config import Config
 
     ec2_client = guardrail.protect_boto3_client(
-        boto3.client("ec2", region_name="us-east-1", config=Config(signature_version=UNSIGNED))
+        boto3.client("ec2", region_name="us-east-1", config=Config(signature_version=UNSIGNED)),
+        emit_ui_telemetry=False,
     )
     hook_blocked = False
     t10 = time.perf_counter()

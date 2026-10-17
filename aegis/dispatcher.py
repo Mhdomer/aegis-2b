@@ -289,22 +289,23 @@ class AWSActionDispatcher:
                 if not (r["Port"] == port and r["CidrIp"] == cidr_ip)
             ]
 
-        # Try real/mocked Boto3 call if configured and available
-        try:
-            self.ec2.revoke_security_group_ingress(
-                GroupId=group_id,
-                IpPermissions=[
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": port,
-                        "ToPort": port,
-                        "IpRanges": [{"CidrIp": cidr_ip}],
-                    }
-                ],
-            )
-        except Exception:
-            # Expected in offline sandbox environments without live AWS keys
-            pass
+        # Invoke injected/mocked Boto3 client only when explicitly provided
+        if self._ec2_client is not None:
+            try:
+                self._ec2_client.revoke_security_group_ingress(
+                    GroupId=group_id,
+                    IpPermissions=[
+                        {
+                            "IpProtocol": "tcp",
+                            "FromPort": port,
+                            "ToPort": port,
+                            "IpRanges": [{"CidrIp": cidr_ip}],
+                        }
+                    ],
+                )
+            except Exception:
+                if getattr(self, "live_aws", False):
+                    raise
 
         return {
             "call": "ec2:RevokeSecurityGroupIngress",
@@ -319,21 +320,22 @@ class AWSActionDispatcher:
             rule = {"Port": port, "CidrIp": cidr_ip, "Protocol": "tcp"}
             if rule not in sg["IngressRules"]:
                 sg["IngressRules"].append(rule)
-        try:
-            self.ec2.authorize_security_group_ingress(
-                GroupId=group_id,
-                IpPermissions=[
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": port,
-                        "ToPort": port,
-                        "IpRanges": [{"CidrIp": cidr_ip}],
-                    }
-                ],
-            )
-        except Exception:
-            if getattr(self, "live_aws", False):
-                raise
+        if self._ec2_client is not None:
+            try:
+                self._ec2_client.authorize_security_group_ingress(
+                    GroupId=group_id,
+                    IpPermissions=[
+                        {
+                            "IpProtocol": "tcp",
+                            "FromPort": port,
+                            "ToPort": port,
+                            "IpRanges": [{"CidrIp": cidr_ip}],
+                        }
+                    ],
+                )
+            except Exception:
+                if getattr(self, "live_aws", False):
+                    raise
         return {
             "call": "ec2:AuthorizeSecurityGroupIngress",
             "group_id": group_id,
@@ -345,15 +347,16 @@ class AWSActionDispatcher:
         rt = self._simulated_state["route_tables"].get(route_table_id)
         if rt:
             rt["Routes"] = [{"DestinationCidrBlock": cidr, "GatewayId": "tgw-inspection-01", "Status": "active"}]
-        try:
-            self.ec2.replace_route(
-                RouteTableId=route_table_id,
-                DestinationCidrBlock=cidr,
-                GatewayId="igw-0123456789",
-            )
-        except Exception:
-            if getattr(self, "live_aws", False):
-                raise
+        if self._ec2_client is not None:
+            try:
+                self._ec2_client.replace_route(
+                    RouteTableId=route_table_id,
+                    DestinationCidrBlock=cidr,
+                    GatewayId="igw-0123456789",
+                )
+            except Exception:
+                if getattr(self, "live_aws", False):
+                    raise
         return {
             "call": "ec2:ReplaceRoute",
             "route_table_id": route_table_id,
@@ -363,11 +366,12 @@ class AWSActionDispatcher:
     def _delete_security_group(self, group_id: str) -> Dict[str, Any]:
         if group_id in self._simulated_state["security_groups"]:
             del self._simulated_state["security_groups"][group_id]
-        try:
-            self.ec2.delete_security_group(GroupId=group_id)
-        except Exception:
-            if getattr(self, "live_aws", False):
-                raise
+        if self._ec2_client is not None:
+            try:
+                self._ec2_client.delete_security_group(GroupId=group_id)
+            except Exception:
+                if getattr(self, "live_aws", False):
+                    raise
         return {
             "call": "ec2:DeleteSecurityGroup",
             "group_id": group_id,
