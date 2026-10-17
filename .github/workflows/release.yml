@@ -56,7 +56,7 @@ jobs:
           mkdir -p deb-pkg/DEBIAN deb-pkg/usr/local/bin deb-pkg/usr/lib/aegis-2b
           cat <<EOF > deb-pkg/DEBIAN/control
           Package: aegis-2b
-          Version: ${PKG_VER:-0.2.0}
+          Version: ${PKG_VER:-0.2.1}
           Section: utils
           Priority: optional
           Architecture: all
@@ -70,7 +70,7 @@ jobs:
           exec python3 -m aegis.cli "$@"
           EOF
           chmod +x deb-pkg/usr/local/bin/aegis
-          dpkg-deb --build deb-pkg "dist/aegis-2b_${PKG_VER:-0.2.0}_all.deb"
+          dpkg-deb --build deb-pkg "dist/aegis-2b_${PKG_VER:-0.2.1}_all.deb"
           cd dist && sha256sum * > SHA256SUMS.txt
 
       - name: Upload Package Artifacts

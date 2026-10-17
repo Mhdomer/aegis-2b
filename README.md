@@ -12,7 +12,8 @@
   <a href="https://mhdomer.github.io/aegis-2b/"><img src="https://img.shields.io/badge/Live_Web_&_CLI_Console-Zero_Install-0284c7?style=flat-square" alt="Live Web & CLI Console" /></a>
   <a href="https://codespaces.new/Mhdomer/aegis-2b"><img src="https://img.shields.io/badge/GitHub_Codespaces-Run_Real_CLI_in_Browser-0f172a?style=flat-square&logo=github" alt="Open in GitHub Codespaces" /></a>
   <a href="https://github.com/Mhdomer/aegis-2b/actions/workflows/ci.yml"><img src="https://github.com/Mhdomer/aegis-2b/actions/workflows/ci.yml/badge.svg" alt="CI & SAST Security Audit" /></a>
-  <a href="https://github.com/Mhdomer/aegis-2b/releases/tag/v0.2.0"><img src="https://img.shields.io/badge/release-v0.2.0_(Official_Wheel)-15803d?style=flat-square" alt="Release v0.2.0" /></a>
+  <a href="https://pypi.org/project/aegis-2b/"><img src="https://img.shields.io/pypi/v/aegis-2b.svg?color=15803d&style=flat-square" alt="PyPI version" /></a>
+  <a href="https://github.com/Mhdomer/aegis-2b/releases/tag/v0.2.1"><img src="https://img.shields.io/badge/release-v0.2.1_(Official_Package)-15803d?style=flat-square" alt="Release v0.2.1" /></a>
 </p>
 
 <p align="center">
@@ -29,7 +30,7 @@ You can evaluate both the **Web Operations Center** and the **`aegis` CLI** dire
 |---|---|---|
 | **1. Live Browser Web Console + CLI Terminal** *(Instant, Zero Install)* | [**mhdomer.github.io/aegis-2b**](https://mhdomer.github.io/aegis-2b/) | Full 6-tab Operations Center (`Incident Defense`, **`CLI Terminal`**, `Architecture & Cost`, `Live Cloud`, `10-Vector Self-Audit`, and `Policy & Custom Test`) running in-browser with real `performance.now()` timing and SHA-256 audit receipts. |
 | **2. 1-Click GitHub Codespaces** *(Real Linux Shell in Browser)* | [**codespaces.new/Mhdomer/aegis-2b**](https://codespaces.new/Mhdomer/aegis-2b) | Boots an isolated Linux VM in your browser with `aegis` pre-installed. Run `aegis demo`, `aegis remediate --iac`, `aegis audit`, `aegis top`, and `pytest -v` in a real terminal. |
-| **3. Official Python Package (`v0.2.0`)** *(Isolated `uvx` / `pip`)* | `uvx --from git+https://github.com/Mhdomer/aegis-2b aegis audit` | Runs 100% offline in a deterministic sandbox by default. Audited via **Bandit AST**, **Ruff SAST (`flake8-bandit`)**, and **SonarQube** in GitHub Actions CI (`0` issues, `4` standard dependencies: `boto3`, `pydantic`, `pyyaml`, `rich`). |
+| **3. Official Python Package (`v0.2.1`)** *(PyPI / Isolated `uvx` / `pip`)* | `pip install aegis-2b` or `uvx aegis-2b audit` | Available on PyPI via automated GitHub Actions OIDC Trusted Publishing. Audited via **Bandit AST**, **Ruff SAST (`flake8-bandit`)**, and **SonarQube** in GitHub Actions CI (`0` issues, `4` standard dependencies: `boto3`, `pydantic`, `pyyaml`, `rich`). |
 
 ---
 
@@ -159,33 +160,38 @@ ec2.delete_security_group(GroupId="sg-core-vpc-01")  # Raises GuardrailBlockedEr
 
 ---
 
-## Installation & Official Package Usage (`aegis-2b v0.2.0`)
+## Installation & Official Package Usage (`aegis-2b v0.2.1`)
 
 You do **not** need to clone this repository to use Aegis-2B. Choose whichever workflow fits your environment:
 
-### 1. Run Instantly in Isolated Ephemeral Virtualenv (`uvx`)
+### 1. Official PyPI Package (`pip` or `uv`)
 ```bash
-# Run the 10-vector security self-audit or 3-tier router directly from GitHub:
-uvx --from git+https://github.com/Mhdomer/aegis-2b aegis audit
-uvx --from git+https://github.com/Mhdomer/aegis-2b aegis remediate --iac
-uvx --from git+https://github.com/Mhdomer/aegis-2b aegis ui
+pip install aegis-2b
+# or via uv
+uv add aegis-2b
 ```
 
-### 2. Install Global CLI Binary (`uv tool` or `pipx`)
+### 2. Run Instantly in Isolated Ephemeral Virtualenv (`uvx`)
 ```bash
-# Option A: via uv tool
-uv tool install git+https://github.com/Mhdomer/aegis-2b
-
-# Option B: via pipx
-pipx install git+https://github.com/Mhdomer/aegis-2b
-
-# Option C: Install official signed release wheel (v0.2.0)
-pip install https://github.com/Mhdomer/aegis-2b/releases/download/v0.2.0/aegis_2b-0.2.0-py3-none-any.whl
+# Run the 10-vector security self-audit or 3-tier router instantly:
+uvx aegis-2b audit
+uvx aegis-2b remediate --iac
+uvx aegis-2b ui
 ```
 
-### 3. Drop-In Python SDK Library (`pip` / `uv add`)
+### 3. Install Global CLI Binary (`pipx`, `brew`, or `uv tool`)
 ```bash
-pip install git+https://github.com/Mhdomer/aegis-2b
+# Option A: via pipx
+pipx install aegis-2b
+
+# Option B: via Homebrew (macOS / Linux)
+brew install Mhdomer/tap/aegis
+
+# Option C: via uv tool
+uv tool install aegis-2b
+
+# Option D: Install official signed release wheel (v0.2.1)
+pip install https://github.com/Mhdomer/aegis-2b/releases/download/v0.2.1/aegis_2b-0.2.1-py3-none-any.whl
 ```
 ```python
 import boto3

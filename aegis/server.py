@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any, Dict
 from urllib.parse import parse_qs, urlparse
 
+from aegis import __version__
 from aegis.dispatcher import AWSActionDispatcher, verify_break_glass_token
 from patterns.guardrails import (
     BlastRadius,
@@ -96,7 +97,7 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
             probe_res = guardrail_instance.evaluate(probe_state)
             self._send_json({
                 "status": "online",
-                "version": "0.2.0",
+                "version": __version__,
                 "circuit_breaker": "ARMED",
                 "fail_closed_threshold": guardrail_instance.risk_threshold,
                 "typed_question": DeciderCloudGuardrail.TYPED_QUESTION,
@@ -476,7 +477,7 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
             conn = get_live_aws_session()
             acct_str = f"{conn['masked_account']} ({conn['region']})" if conn["connected"] else "sandbox (us-east-1)"
             findings = _load_findings_from_input(None, None, None)
-            lines.append(f"aegis-2b v0.2.0 | 3-Tier Remediation Router & Terraform Diff")
+            lines.append(f"aegis-2b v{__version__} | 3-Tier Remediation Router & Terraform Diff")
             lines.append(f"Connected AWS Account: {acct_str} | Read-only discovery ($0.00)")
             lines.append("-" * 88)
             lines.append(f"{'ID':<8} {'Resource':<26} {'Proposed Tool':<30} {'Route':<13} {'Result & Latency'}")
@@ -510,7 +511,7 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
 
         elif "audit" in cmd_str:
             audit_data = run_security_self_audit_data()
-            lines.append("aegis-2b v0.2.0 | 10-Vector Security Self-Audit")
+            lines.append(f"aegis-2b v{__version__} | 10-Vector Security Self-Audit")
             lines.append("Standards: OWASP LLM Top 10, MITRE ATLAS, AWS Well-Architected Security")
             lines.append("-" * 88)
             for c in audit_data["checks"]:
@@ -523,7 +524,7 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
 
         elif "test-aws" in cmd_str:
             conn = get_live_aws_session()
-            lines.append("aegis-2b v0.2.0 | Live AWS Botocore Hook Verification")
+            lines.append(f"aegis-2b v{__version__} | Live AWS Botocore Hook Verification")
             if conn["connected"]:
                 lines.append(f"Account: {conn['masked_account']} | Region: {conn['region']} | Principal: {conn['arn']} (STS RTT: {conn['sts_latency_ms']} ms)")
                 ec2 = guardrail_instance.protect_boto3_client(conn["session"].client("ec2", config=conn["config"]))
@@ -620,7 +621,7 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
                 hook_s.append((time.perf_counter_ns() - th) / 1_000_000.0)
             p50_e, p90_e = statistics.median(eval_s), statistics.quantiles(eval_s, n=10)[8]
             p50_h, p90_h = statistics.median(hook_s), statistics.quantiles(hook_s, n=10)[8]
-            lines.append("aegis-2b v0.2.0 | Live Latency Benchmark (100 iterations, time.perf_counter_ns)")
+            lines.append(f"aegis-2b v{__version__} | Live Latency Benchmark (100 iterations, time.perf_counter_ns)")
             lines.append("-" * 88)
             lines.append(f"1. Direct Schema Evaluator (100 runs)      : P50 = {p50_e:.3f} ms ({p50_e * 1000:.1f} us) | P90 = {p90_e:.3f} ms")
             lines.append(f"2. Botocore Pre-HTTP Hook Block (100 runs) : P50 = {p50_h:.3f} ms | P90 = {p90_h:.3f} ms")

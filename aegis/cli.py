@@ -308,6 +308,8 @@ def run_policy_command():
 
 
 def main():
+    from aegis import __version__
+
     parser = argparse.ArgumentParser(
         prog="aegis",
         description="Aegis-2B: Sub-Second Safety Circuit Breaker using Strands Decider 2B",
@@ -315,7 +317,7 @@ def main():
     parser.add_argument(
         "--version",
         action="version",
-        version="aegis-2b 0.2.0",
+        version=f"aegis-2b {__version__}",
     )
     parser.add_argument(
         "--interactive",
