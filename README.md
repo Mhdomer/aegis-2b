@@ -9,8 +9,27 @@
 </p>
 
 <p align="center">
+  <a href="https://mhdomer.github.io/aegis-2b/"><img src="https://img.shields.io/badge/Live_Web_&_CLI_Console-Zero_Install-0284c7?style=flat-square" alt="Live Web & CLI Console" /></a>
+  <a href="https://codespaces.new/Mhdomer/aegis-2b"><img src="https://img.shields.io/badge/GitHub_Codespaces-Run_Real_CLI_in_Browser-0f172a?style=flat-square&logo=github" alt="Open in GitHub Codespaces" /></a>
+  <a href="https://github.com/Mhdomer/aegis-2b/actions/workflows/ci.yml"><img src="https://github.com/Mhdomer/aegis-2b/actions/workflows/ci.yml/badge.svg" alt="CI & SAST Security Audit" /></a>
+  <a href="https://github.com/Mhdomer/aegis-2b/releases/tag/v0.2.0"><img src="https://img.shields.io/badge/release-v0.2.0_(Official_Wheel)-15803d?style=flat-square" alt="Release v0.2.0" /></a>
+</p>
+
+<p align="center">
   <code>#strands-decider-2b</code> · <code>#guardrails</code> · <a href="LICENSE">MIT License</a> · <code>0.50ms Pre-HTTP Gate</code> · <code>$0.00 Safety Cost</code> · <code>10/10 Self-Audit</code>
 </p>
+
+---
+
+## Try Aegis-2B in 10 Seconds (Zero Local Installation Required)
+
+You can evaluate both the **Web Operations Center** and the **`aegis` CLI** directly in your browser without installing anything or configuring AWS credentials:
+
+| Evaluation Mode | Link / Command | What You Can Test |
+|---|---|---|
+| **1. Live Browser Web Console + CLI Terminal** *(Instant, Zero Install)* | [**mhdomer.github.io/aegis-2b**](https://mhdomer.github.io/aegis-2b/) | Full 6-tab Operations Center (`Incident Defense`, **`CLI Terminal`**, `Architecture & Cost`, `Live Cloud`, `10-Vector Self-Audit`, and `Policy & Custom Test`) running in-browser with real `performance.now()` timing and SHA-256 audit receipts. |
+| **2. 1-Click GitHub Codespaces** *(Real Linux Shell in Browser)* | [**codespaces.new/Mhdomer/aegis-2b**](https://codespaces.new/Mhdomer/aegis-2b) | Boots an isolated Linux VM in your browser with `aegis` pre-installed. Run `aegis demo`, `aegis remediate --iac`, `aegis audit`, `aegis top`, and `pytest -v` in a real terminal. |
+| **3. Official Python Package (`v0.2.0`)** *(Isolated `uvx` / `pip`)* | `uvx --from git+https://github.com/Mhdomer/aegis-2b aegis audit` | Runs 100% offline in a deterministic sandbox by default. Audited via **Bandit AST**, **Ruff SAST (`flake8-bandit`)**, and **SonarQube** in GitHub Actions CI (`0` issues, `4` standard dependencies: `boto3`, `pydantic`, `pyyaml`, `rich`). |
 
 ---
 
@@ -140,19 +159,19 @@ ec2.delete_security_group(GroupId="sg-core-vpc-01")  # Raises GuardrailBlockedEr
 
 ---
 
-## Installation & Zero-Clone Usage
+## Installation & Official Package Usage (`aegis-2b v0.2.0`)
 
-You do **not** need to clone this repository to use Aegis-2B. You can run it directly or install it globally like any standard DevSecOps CLI tool or Python library:
+You do **not** need to clone this repository to use Aegis-2B. Choose whichever workflow fits your environment:
 
-### 1. Run Instantly Without Installing (`uvx`)
+### 1. Run Instantly in Isolated Ephemeral Virtualenv (`uvx`)
 ```bash
-# Run the 10-vector security self-audit or live AWS test directly from GitHub:
+# Run the 10-vector security self-audit or 3-tier router directly from GitHub:
 uvx --from git+https://github.com/Mhdomer/aegis-2b aegis audit
-uvx --from git+https://github.com/Mhdomer/aegis-2b aegis test-aws
+uvx --from git+https://github.com/Mhdomer/aegis-2b aegis remediate --iac
 uvx --from git+https://github.com/Mhdomer/aegis-2b aegis ui
 ```
 
-### 2. Install Global CLI Binary (`uv`, `pipx`, or `curl`)
+### 2. Install Global CLI Binary (`uv tool` or `pipx`)
 ```bash
 # Option A: via uv tool
 uv tool install git+https://github.com/Mhdomer/aegis-2b
@@ -160,8 +179,8 @@ uv tool install git+https://github.com/Mhdomer/aegis-2b
 # Option B: via pipx
 pipx install git+https://github.com/Mhdomer/aegis-2b
 
-# Option C: One-line POSIX shell installer
-curl -fsSL https://raw.githubusercontent.com/Mhdomer/aegis-2b/main/install.sh | sh
+# Option C: Install official signed release wheel (v0.2.0)
+pip install https://github.com/Mhdomer/aegis-2b/releases/download/v0.2.0/aegis_2b-0.2.0-py3-none-any.whl
 ```
 
 ### 3. Drop-In Python SDK Library (`pip` / `uv add`)

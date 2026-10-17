@@ -81,7 +81,7 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
             aws_conn = get_live_aws_session()
             self._send_json({
                 "status": "online",
-                "version": "0.1.0",
+                "version": "0.2.0",
                 "circuit_breaker": "ARMED",
                 "fail_closed_threshold": guardrail_instance.risk_threshold,
                 "typed_question": DeciderCloudGuardrail.TYPED_QUESTION,

@@ -184,9 +184,16 @@ Every number in Aegis-2B is measured directly on local hardware (**CachyOS Linux
 
 ---
 
-## Try It Yourself (Zero Clone Needed)
+## Try It Yourself (Zero Local Installation Needed)
 
-You can run Aegis-2B directly from GitHub via `uvx` or clone the repository:
+You can evaluate both the **Web Operations Center** and the **`aegis` CLI** directly in your browser without installing anything:
+
+1. **Live Browser Web & CLI Console (Instant, Zero Install):**  
+   [**https://mhdomer.github.io/aegis-2b/**](https://mhdomer.github.io/aegis-2b/) — Includes the 6-tab Operations Center (`Incident Defense`, interactive **`CLI Terminal`**, `Architecture & Cost`, `Live Cloud`, `10-Vector Self-Audit`, and `Policy & Custom Test`).
+2. **1-Click GitHub Codespaces (Real Linux CLI in Browser):**  
+   [**https://codespaces.new/Mhdomer/aegis-2b**](https://codespaces.new/Mhdomer/aegis-2b) — Boots an isolated cloud container with `aegis` pre-installed.
+
+Or run the official package locally (`uvx` / `pip`):
 
 ```bash
 # Run directly without cloning via uvx
@@ -206,7 +213,7 @@ uv run aegis audit
 # 3. Test live Botocore pre-HTTP interception against your AWS account ($0.00 read-only + local block)
 uv run aegis test-aws
 
-# 4. Launch the 5-tab Minimal Light Web Operations Center
+# 4. Launch the 6-tab Minimal Light Web Operations Center
 uv run aegis ui
 
 # 5. Run the empirical latency & token cost benchmark suite
@@ -215,3 +222,4 @@ uv run aegis benchmark
 
 Check out the full source code, reusable guardrail pattern, and engineering log on GitHub:  
 **[github.com/Mhdomer/aegis-2b](https://github.com/Mhdomer/aegis-2b)**
+
