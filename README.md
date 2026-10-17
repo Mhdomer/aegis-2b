@@ -9,6 +9,7 @@
 </p>
 
 <p align="center">
+  <a href="https://youtu.be/xdTGxZNst0M"><img src="https://img.shields.io/badge/Demo_Video-2m_56s_(1080p60)-FF0000?style=flat-square&logo=youtube&logoColor=white" alt="Watch 2m 56s Demo Video" /></a>
   <a href="https://mhdomer.github.io/aegis-2b/"><img src="https://img.shields.io/badge/Live_Web_&_CLI_Console-Zero_Install-0284c7?style=flat-square" alt="Live Web & CLI Console" /></a>
   <a href="https://codespaces.new/Mhdomer/aegis-2b"><img src="https://img.shields.io/badge/GitHub_Codespaces-Run_Real_CLI_in_Browser-0f172a?style=flat-square&logo=github" alt="Open in GitHub Codespaces" /></a>
   <a href="https://github.com/Mhdomer/aegis-2b/actions/workflows/ci.yml"><img src="https://github.com/Mhdomer/aegis-2b/actions/workflows/ci.yml/badge.svg" alt="CI & SAST Security Audit" /></a>
@@ -28,10 +29,11 @@ You can evaluate both the **Web Operations Center** and the **`aegis` CLI** dire
 
 | Evaluation Mode | Link / Command | What You Can Test |
 |---|---|---|
-| **1. Live Browser Web Console + CLI Terminal** *(Instant, Zero Install)* | [**mhdomer.github.io/aegis-2b**](https://mhdomer.github.io/aegis-2b/) | Full 6-tab Operations Center (`Incident Defense`, **`CLI Terminal`**, `Architecture & Cost`, `Live Cloud`, `10-Vector Self-Audit`, and `Policy & Custom Test`) running in-browser with real `performance.now()` timing and SHA-256 audit receipts. |
-| **2. 1-Click GitHub Codespaces** *(Real Linux Shell in Browser)* | [**codespaces.new/Mhdomer/aegis-2b**](https://codespaces.new/Mhdomer/aegis-2b) | Boots an isolated Linux VM in your browser with `aegis` pre-installed. Run `aegis demo`, `aegis remediate --iac`, `aegis audit`, `aegis top`, and `pytest -v` in a real terminal. |
-| **3. Official Python Package (`v0.2.1`)** *(PyPI / Isolated `uvx` / `pip`)* | `pip install aegis-2b` or `uvx aegis-2b audit` | Available on PyPI via automated GitHub Actions OIDC Trusted Publishing. Audited via **Bandit AST**, **Ruff SAST (`flake8-bandit`)**, and **SonarQube** in GitHub Actions CI (`0` issues, `4` standard dependencies: `boto3`, `pydantic`, `pyyaml`, `rich`). |
-| **4. Pre-built OCI Container (`ghcr.io`)** *(Docker / CI/CD Pipelines)* | `docker run --rm ghcr.io/mhdomer/aegis-2b:latest audit` | Hardened, non-root multi-arch container (`linux/amd64`, `linux/arm64`) for GitHub Actions, GitLab CI, and containerized agent runtimes. |
+| **1. 2m 56s Live Video Demo** *(Subtitled, 1080p60)* | [**Watch on YouTube (`youtu.be/xdTGxZNst0M`)**](https://youtu.be/xdTGxZNst0M) | 50/50 split of real CachyOS terminal and live web console: Tier 0 Boto3 remediation, prompt injection defense, and break-glass MFA token verification. |
+| **2. Live Browser Web Console + CLI Terminal** *(Instant, Zero Install)* | [**mhdomer.github.io/aegis-2b**](https://mhdomer.github.io/aegis-2b/) | Full 6-tab Operations Center (`Incident Defense`, **`CLI Terminal`**, `Architecture & Cost`, `Live Cloud`, `10-Vector Self-Audit`, and `Policy & Custom Test`) running in-browser with real `performance.now()` timing and SHA-256 audit receipts. |
+| **3. 1-Click GitHub Codespaces** *(Real Linux Shell in Browser)* | [**codespaces.new/Mhdomer/aegis-2b**](https://codespaces.new/Mhdomer/aegis-2b) | Boots an isolated Linux VM in your browser with `aegis` pre-installed. Run `aegis demo`, `aegis remediate --iac`, `aegis audit`, `aegis top`, and `pytest -v` in a real terminal. |
+| **4. Official Python Package (`v0.2.1`)** *(PyPI / Isolated `uvx` / `pip`)* | `pip install aegis-2b` or `uvx aegis-2b audit` | Available on PyPI via automated GitHub Actions OIDC Trusted Publishing. Audited via **Bandit AST**, **Ruff SAST (`flake8-bandit`)**, and **SonarQube** in GitHub Actions CI (`0` issues, `4` standard dependencies: `boto3`, `pydantic`, `pyyaml`, `rich`). |
+| **5. Pre-built OCI Container (`ghcr.io`)** *(Docker / CI/CD Pipelines)* | `docker run --rm ghcr.io/mhdomer/aegis-2b:latest audit` | Hardened, non-root multi-arch container (`linux/amd64`, `linux/arm64`) for GitHub Actions, GitLab CI, and containerized agent runtimes. |
 
 ---
 
