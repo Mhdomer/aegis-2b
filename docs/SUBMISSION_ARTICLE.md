@@ -30,6 +30,9 @@ When AWS introduced the experimental **Strands Decider 2B** concept (a small, no
 
 ## The Big Picture: Scanner vs. Agent vs. Circuit Breaker
 
+![Aegis-2B: Scanner vs Agent vs Circuit Breaker](https://raw.githubusercontent.com/Mhdomer/aegis-2b/main/docs/images/aegis-scanner-vs-agent-breaker.png)
+*(Figure 1: Clean separation between Detection, LLM Cognition, and Client-Side Circuit Breaking)*
+
 To understand where Aegis-2B sits in an enterprise security workflow:
 
 1. **The Detection Layer (Scanner):** Tools like AWS GuardDuty, Security Hub, Prowler, or `aegis scan --live` detect vulnerabilities: *"Security Group sg-core has world-open port 22."* Scanners do not fix problems.
@@ -41,6 +44,9 @@ To understand where Aegis-2B sits in an enterprise security workflow:
 ## 2. Architecture & Botocore Interception
 
 Here is the complete end-to-end architecture showing how findings flow from AWS Security Hub into the Aegis-2B runtime, through the circuit breaker boundary, and out to live AWS targets alongside declarative Terraform patches:
+
+![Aegis-2B Production AWS Architecture](https://raw.githubusercontent.com/Mhdomer/aegis-2b/main/docs/images/aegis-aws-architecture.drawio.png)
+*(Figure 2: Production AWS Cloud Architecture with official AWS component icons. [View Hand-Drawn Whiteboard Sketch](https://raw.githubusercontent.com/Mhdomer/aegis-2b/main/docs/images/aegis-aws-architecture-exceldraw.png))*
 
 ```text
 [AWS Security Hub / GuardDuty Alert]
@@ -74,18 +80,33 @@ Here is the complete end-to-end architecture showing how findings flow from AWS 
 
 ## Mathematical Multi-Head Risk Formulation
 
-Aegis-2B evaluates a deterministic multi-head risk formula across 5 structural dimensions of the proposed AWS action:
+Unlike fuzzy prompts that ask an LLM "is this action dangerous?", Aegis-2B computes a deterministic multi-head risk score across 5 structural dimensions:
 
-$$\text{Composite Risk} = \max\Big(w_1 R_{\text{destructive}},\, w_2 R_{\text{privilege}},\, w_3 R_{\text{network}},\, w_4 R_{\text{blast}},\, w_5 R_{\text{injection}}\Big)$$
+```text
+Composite Risk = MAX(
+    w1 * Destructive_Mutation,
+    w2 * Privilege_Escalation,
+    w3 * Network_Exposure,
+    w4 * Blast_Radius,
+    w5 * Injection_Anomaly
+)
+```
 
-Where each head scores between $0.0$ and $1.0$:
-- $R_{\text{destructive}}$: Mutation severity (e.g. `Delete*`, `Terminate*`, `Drop*`).
-- $R_{\text{privilege}}$: IAM escalation (wildcard `'Action': '*'`, `AdministratorAccess`).
-- $R_{\text{network}}$: Public network exposure (`0.0.0.0/0` ingress openings or URL-encoded variations).
-- $R_{\text{blast}}$: Scope of affected resources (`VPC_WIDE`, `ACCOUNT_WIDE`).
-- $R_{\text{injection}}$: Indirect prompt injection anomaly signatures in alert payloads.
+Where each dimension is normalized between `0.0` and `1.0`:
+- **Destructive Mutation (`R_dest`):** Severity of mutation (e.g. `Delete*`, `Terminate*`, `Drop*`).
+- **Privilege Escalation (`R_priv`):** IAM wildcard escalation (`Action: '*'`, `AdministratorAccess`).
+- **Network Exposure (`R_net`):** Public CIDR openings (`0.0.0.0/0` ingress or URL-encoded variations).
+- **Blast Radius (`R_blast`):** Scope of affected resources (`VPC_WIDE`, `ACCOUNT_WIDE`).
+- **Injection Anomaly (`R_inj`):** Prompt injection signatures in alert descriptions.
 
-If $\text{Composite Risk} \ge 0.50$ or if confidence falls below the calibrated threshold ($0.85$), execution strictly halts and demands an authorized human Break-Glass MFA token.
+```text
+Decision Rules & Fail-Closed Gate:
+- Confidence = (1.0 - Composite_Risk) if Action is PERMIT, else Composite_Risk
+- IF Composite_Risk >= 0.50 OR Confidence < 0.85:
+  --> Verdict: ENFORCE_BREAK_GLASS (Strictly halts pre-HTTP & demands MFA token)
+- ELSE:
+  --> Verdict: PERMIT_AUTO_REMEDIATION (Fast-lane Boto3 execution)
+```
 
 ---
 
@@ -244,6 +265,9 @@ We tested Aegis-2B against both our ASFF finding fixtures (`scenarios/fixtures/*
 ---
 
 ## Try It Yourself (Zero Local Installation Needed)
+
+![Aegis-2B Web Operations Center](https://raw.githubusercontent.com/Mhdomer/aegis-2b/main/docs/images/aegis-web-dashboard.png)
+*(Figure 3: Monochromatic Web Operations Center showing real-time telemetry, embedded terminal emulator, live AWS posture scanner, and cryptographic audit receipts)*
 
 You can evaluate both the Web Operations Center and the `aegis` CLI directly in your browser without installing anything:
 
