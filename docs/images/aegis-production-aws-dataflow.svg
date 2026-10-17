@@ -1,0 +1,404 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 820" width="100%" height="100%" style="background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="grad-aws-bar" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#232f3e"/>
+      <stop offset="100%" stop-color="#131921"/>
+    </linearGradient>
+    <linearGradient id="grad-aegis-box" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f8fafc"/>
+    </linearGradient>
+    <linearGradient id="grad-bedrock" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#527fff"/>
+      <stop offset="100%" stop-color="#0052cc"/>
+    </linearGradient>
+    <linearGradient id="grad-security" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e02424"/>
+      <stop offset="100%" stop-color="#991515"/>
+    </linearGradient>
+    <linearGradient id="grad-gate-pass" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f0fdf4"/>
+      <stop offset="100%" stop-color="#dcfce7"/>
+    </linearGradient>
+    <linearGradient id="grad-gate-block" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fef2f2"/>
+      <stop offset="100%" stop-color="#fee2e2"/>
+    </linearGradient>
+
+    <!-- Markers -->
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#15803d"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#b91c1c"/>
+    </marker>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#7c3aed"/>
+    </marker>
+    <marker id="arrow-gray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b"/>
+    </marker>
+
+    <!-- Filters for soft drop shadow -->
+    <filter id="shadow-card" x="-6%" y="-6%" width="112%" height="114%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.06"/>
+    </filter>
+    <filter id="shadow-gate" x="-6%" y="-6%" width="112%" height="114%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#0f172a" flood-opacity="0.1"/>
+    </filter>
+  </defs>
+
+  <!-- Top Title Header -->
+  <rect x="0" y="0" width="1440" height="56" fill="url(#grad-aws-bar)" />
+  <circle cx="34" cy="28" r="14" fill="#ff9900" />
+  <path d="M 26 29 Q 34 35 42 27 M 40 25 L 42 27 L 39 29" fill="none" stroke="#232f3e" stroke-width="2.2" stroke-linecap="round"/>
+  <text x="58" y="34" fill="#ffffff" font-size="16" font-weight="700" letter-spacing="-0.01em">Aegis-2B | Production AWS Cloud Architecture</text>
+  <text x="500" y="34" fill="#94a3b8" font-size="13">Sub-Second Safety Circuit Breaker &amp; 3-Tier Router for Autonomous Cloud Ops</text>
+  <rect x="1270" y="16" width="144" height="24" rx="4" fill="#334155" />
+  <text x="1342" y="32" text-anchor="middle" fill="#38bdf8" font-size="11.5" font-family="monospace">AWS us-east-1</text>
+
+  <!-- OUTER BOUNDARY: AWS Cloud Region -->
+  <rect x="24" y="74" width="1392" height="722" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" filter="url(#shadow-card)"/>
+  
+  <!-- Region Header Tag -->
+  <rect x="40" y="86" width="220" height="28" rx="4" fill="#eff6ff" stroke="#bfdbfe"/>
+  <!-- AWS Cloud Icon -->
+  <path d="M 52 104 A 6 6 0 0 1 58 98 A 9 9 0 0 1 73 95 A 8 8 0 0 1 82 102 A 6 6 0 0 1 80 104 Z" fill="#2563eb" />
+  <text x="88" y="105" fill="#1e40af" font-size="12" font-weight="700">AWS Cloud (Region: us-east-1)</text>
+
+  <!-- ===================================================================== -->
+  <!-- ZONE 1: INGESTION & COGNITIVE PLANNING (Left Column)                 -->
+  <!-- ===================================================================== -->
+  <rect x="44" y="128" width="280" height="644" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.2"/>
+  <text x="60" y="152" fill="#0f172a" font-size="13" font-weight="700">1. Security Finding Ingestion</text>
+  <text x="60" y="168" fill="#64748b" font-size="11.5">ASFF Alert Feeds &amp; Event Bus</text>
+
+  <!-- AWS Security Hub Card -->
+  <g transform="translate(60, 184)">
+    <rect x="0" y="0" width="248" height="88" rx="6" fill="#ffffff" stroke="#e2e8f0" filter="url(#shadow-card)"/>
+    <rect x="0" y="0" width="6" height="88" rx="3" fill="#e11d48"/>
+    <!-- Security Hub Icon Badge -->
+    <rect x="14" y="14" width="36" height="36" rx="6" fill="#ffe4e6"/>
+    <path d="M 32 20 L 42 24 L 42 32 C 42 38 32 44 32 44 C 32 44 22 38 22 32 L 22 24 Z" fill="#e11d48"/>
+    <text x="60" y="32" fill="#0f172a" font-size="13" font-weight="600">AWS Security Hub</text>
+    <text x="60" y="48" fill="#64748b" font-size="11">ASFF Finding Ingestion</text>
+    <rect x="14" y="60" width="220" height="20" rx="3" fill="#fff1f2"/>
+    <text x="20" y="74" fill="#be123c" font-size="10.5" font-family="monospace">EC2.18 / CIS AWS 1.16</text>
+  </g>
+
+  <!-- Amazon GuardDuty Card -->
+  <g transform="translate(60, 286)">
+    <rect x="0" y="0" width="248" height="88" rx="6" fill="#ffffff" stroke="#e2e8f0" filter="url(#shadow-card)"/>
+    <rect x="0" y="0" width="6" height="88" rx="3" fill="#9333ea"/>
+    <!-- GuardDuty Icon Badge -->
+    <rect x="14" y="14" width="36" height="36" rx="6" fill="#f3e8ff"/>
+    <path d="M 32 20 L 40 25 L 40 33 C 40 38 32 43 32 43 C 32 43 24 38 24 33 L 24 25 Z" fill="#9333ea"/>
+    <circle cx="32" cy="30" r="3.5" fill="#ffffff"/>
+    <text x="60" y="32" fill="#0f172a" font-size="13" font-weight="600">Amazon GuardDuty</text>
+    <text x="60" y="48" fill="#64748b" font-size="11">Threat &amp; Anomaly Signals</text>
+    <rect x="14" y="60" width="220" height="20" rx="3" fill="#faf5ff"/>
+    <text x="20" y="74" fill="#7e22ce" font-size="10.5" font-family="monospace">UnauthorizedAccess:EC2/SSH</text>
+  </g>
+
+  <!-- Amazon EventBridge Card -->
+  <g transform="translate(60, 388)">
+    <rect x="0" y="0" width="248" height="84" rx="6" fill="#ffffff" stroke="#e2e8f0" filter="url(#shadow-card)"/>
+    <rect x="0" y="0" width="6" height="84" rx="3" fill="#e11d48"/>
+    <!-- EventBridge Icon Badge -->
+    <rect x="14" y="12" width="36" height="36" rx="6" fill="#ffe4e6"/>
+    <circle cx="26" cy="24" r="3.5" fill="#e11d48"/>
+    <circle cx="38" cy="24" r="3.5" fill="#e11d48"/>
+    <circle cx="32" cy="36" r="3.5" fill="#e11d48"/>
+    <path d="M 26 24 L 38 24 L 32 36 Z" fill="none" stroke="#e11d48" stroke-width="1.5"/>
+    <text x="60" y="30" fill="#0f172a" font-size="13" font-weight="600">Amazon EventBridge</text>
+    <text x="60" y="46" fill="#64748b" font-size="11">CloudWatch Events Bus</text>
+    <rect x="14" y="56" width="220" height="18" rx="3" fill="#f8fafc"/>
+    <text x="20" y="69" fill="#475569" font-size="10.5" font-family="monospace">Rule: aegis-finding-trigger</text>
+  </g>
+
+  <!-- Cognitive Planner Box (Bedrock) -->
+  <g transform="translate(60, 486)">
+    <rect x="0" y="0" width="248" height="266" rx="6" fill="#ffffff" stroke="#bfdbfe" stroke-width="1.5" filter="url(#shadow-card)"/>
+    <rect x="0" y="0" width="248" height="34" rx="6" fill="#eff6ff"/>
+    <text x="14" y="22" fill="#1d4ed8" font-size="12" font-weight="700">COGNITIVE PLANNING LAYER</text>
+    
+    <!-- Amazon Bedrock Badge -->
+    <rect x="14" y="44" width="36" height="36" rx="6" fill="#dbeafe"/>
+    <!-- Bedrock AI Icon -->
+    <path d="M 22 56 L 32 48 L 42 56 L 32 64 Z" fill="#2563eb"/>
+    <circle cx="32" cy="56" r="2.5" fill="#ffffff"/>
+    <text x="58" y="58" fill="#0f172a" font-size="13" font-weight="600">Amazon Bedrock</text>
+    <text x="58" y="74" fill="#2563eb" font-size="11">Claude 3.5 Sonnet / Nova</text>
+
+    <!-- Capabilities -->
+    <rect x="14" y="90" width="220" height="66" rx="4" fill="#f8fafc" stroke="#e2e8f0"/>
+    <text x="22" y="108" fill="#334155" font-size="11" font-weight="600">Cognitive Reasoning Tasks:</text>
+    <text x="22" y="126" fill="#64748b" font-size="10.5">• Multi-resource graph triage</text>
+    <text x="22" y="142" fill="#64748b" font-size="10.5">• Proposes Boto3 mutations</text>
+
+    <!-- Vulnerability Alert Banner -->
+    <rect x="14" y="166" width="220" height="88" rx="4" fill="#fff7ed" stroke="#fed7aa"/>
+    <text x="22" y="184" fill="#c2410c" font-size="11" font-weight="700">Enterprise Vulnerability:</text>
+    <text x="22" y="200" fill="#9a3412" font-size="10.5">• 1,840ms Bedrock roundtrip</text>
+    <text x="22" y="216" fill="#9a3412" font-size="10.5">• $6.30 / 1k findings cost</text>
+    <text x="22" y="232" fill="#9a3412" font-size="10.5">• Susceptible to Prompt Injection</text>
+    <text x="22" y="246" fill="#b91c1c" font-size="10" font-weight="600">Must NOT have unchecked agency!</text>
+  </g>
+
+  <!-- Connectors Zone 1 to Zone 2 -->
+  <line x1="308" y1="228" x2="350" y2="425" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="3,3"/>
+  <line x1="308" y1="330" x2="350" y2="425" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="3,3"/>
+  <line x1="308" y1="430" x2="368" y2="430" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <rect x="312" y="416" width="50" height="18" rx="3" fill="#ffffff" stroke="#bfdbfe"/>
+  <text x="337" y="429" text-anchor="middle" fill="#1d4ed8" font-size="10" font-weight="600">ASFF</text>
+
+  <path d="M 308 580 L 340 580 L 340 450 L 368 450" fill="none" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <rect x="312" y="500" width="52" height="18" rx="3" fill="#ffffff" stroke="#bfdbfe"/>
+  <text x="338" y="513" text-anchor="middle" fill="#1d4ed8" font-size="10" font-weight="600">Plan</text>
+
+  <!-- ===================================================================== -->
+  <!-- ZONE 2: AEGIS-2B CORE CIRCUIT BREAKER (Center Column)                -->
+  <!-- ===================================================================== -->
+  <rect x="372" y="128" width="580" height="644" rx="8" fill="url(#grad-aegis-box)" stroke="#0f172a" stroke-width="2" filter="url(#shadow-gate)"/>
+  
+  <!-- Aegis-2B Header Banner -->
+  <rect x="372" y="128" width="580" height="44" rx="8" fill="#0f172a"/>
+  <!-- Shield Badge -->
+  <circle cx="396" cy="150" r="12" fill="#0284c7" />
+  <path d="M 391 146 L 396 142 L 401 146 L 401 152 C 401 155 396 158 396 158 C 396 158 391 155 391 152 Z" fill="#ffffff"/>
+  <text x="418" y="155" fill="#ffffff" font-size="15" font-weight="700">2. Aegis-2B Sub-Second Safety Circuit Breaker (Local Host / Sidecar)</text>
+  <rect x="850" y="138" width="90" height="24" rx="4" fill="#0369a1"/>
+  <text x="895" y="154" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="600">~115ms Gate</text>
+
+  <!-- Sub-block 1: 3-Tier Calibrated Router -->
+  <g transform="translate(390, 184)">
+    <rect x="0" y="0" width="544" height="106" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2"/>
+    <text x="14" y="20" fill="#0f172a" font-size="12.5" font-weight="700">3-Tier Remediation Router (patterns/guardrails/)</text>
+    <text x="14" y="36" fill="#64748b" font-size="11">Saves up to 100% of LLM tokens by short-circuiting deterministic runbooks</text>
+
+    <!-- Tier 0 -->
+    <rect x="14" y="44" width="162" height="52" rx="4" fill="#f0fdf4" stroke="#86efac"/>
+    <text x="22" y="62" fill="#15803d" font-size="11.5" font-weight="700">Tier 0: Direct Rule</text>
+    <text x="22" y="76" fill="#166534" font-size="10.5">0 Tokens · $0.00 Cost</text>
+    <text x="22" y="88" fill="#15803d" font-size="10" font-family="monospace">e.g. revoke_sg_ingress</text>
+
+    <!-- Tier 1 -->
+    <rect x="191" y="44" width="162" height="52" rx="4" fill="#eff6ff" stroke="#bfdbfe"/>
+    <text x="199" y="62" fill="#1d4ed8" font-size="11.5" font-weight="700">Tier 1: Nova Micro</text>
+    <text x="199" y="76" fill="#1e40af" font-size="10.5">~80% Token Reduction</text>
+    <text x="199" y="88" fill="#1d4ed8" font-size="10" font-family="monospace">Single-resource config</text>
+
+    <!-- Tier 2 -->
+    <rect x="368" y="44" width="162" height="52" rx="4" fill="#fdf4ff" stroke="#f0abfc"/>
+    <text x="376" y="62" fill="#86198f" font-size="11.5" font-weight="700">Tier 2: Claude 3.5</text>
+    <text x="376" y="76" fill="#701a75" font-size="10.5">Heavy Cognitive Reason</text>
+    <text x="376" y="88" fill="#86198f" font-size="10" font-family="monospace">VPC-wide / IAM updates</text>
+  </g>
+
+  <!-- Sub-block 2: Botocore Pre-HTTP Hook -->
+  <g transform="translate(390, 302)">
+    <rect x="0" y="0" width="544" height="236" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2"/>
+    
+    <rect x="0" y="0" width="544" height="28" rx="6" fill="#f1f5f9"/>
+    <text x="14" y="19" fill="#0f172a" font-size="12" font-weight="700">Botocore Pre-HTTP Hook Interceptor (before-parameter-build.*.*)</text>
+    <text x="414" y="19" fill="#15803d" font-size="11" font-weight="600">0.079ms P50 drop</text>
+
+    <!-- Normalization Row -->
+    <rect x="14" y="38" width="516" height="34" rx="4" fill="#f8fafc" stroke="#e2e8f0"/>
+    <text x="24" y="54" fill="#0f172a" font-size="11" font-weight="600">Adversarial Input Normalization:</text>
+    <text x="206" y="54" fill="#64748b" font-size="10.5">Strips Zero-Width Unicode (U+200B..F) &amp; URL-encoded %30.0.0.0/0</text>
+    <text x="24" y="67" fill="#16a34a" font-size="10" font-weight="600">Defense Against MITRE ATLAS AML.T0051 &amp; OWASP LLM01</text>
+
+    <!-- 5 Calibrated Risk Heads -->
+    <text x="14" y="92" fill="#334155" font-size="11.5" font-weight="700">5-Head Calibrated Strands Decider 2B Classifier:</text>
+
+    <!-- Head 1 -->
+    <rect x="14" y="100" width="98" height="58" rx="4" fill="#f8fafc" stroke="#e2e8f0"/>
+    <text x="20" y="116" fill="#0f172a" font-size="10.5" font-weight="600">Destructive</text>
+    <text x="20" y="128" fill="#64748b" font-size="9.5">API Verbs</text>
+    <text x="20" y="146" fill="#dc2626" font-size="9.5" font-family="monospace">delete/drop</text>
+
+    <!-- Head 2 -->
+    <rect x="118" y="100" width="98" height="58" rx="4" fill="#f8fafc" stroke="#e2e8f0"/>
+    <text x="124" y="116" fill="#0f172a" font-size="10.5" font-weight="600">Privilege</text>
+    <text x="124" y="128" fill="#64748b" font-size="9.5">Escalation</text>
+    <text x="124" y="146" fill="#dc2626" font-size="9.5" font-family="monospace">AdminAccess</text>
+
+    <!-- Head 3 -->
+    <rect x="222" y="100" width="98" height="58" rx="4" fill="#f8fafc" stroke="#e2e8f0"/>
+    <text x="228" y="116" fill="#0f172a" font-size="10.5" font-weight="600">Network</text>
+    <text x="228" y="128" fill="#64748b" font-size="9.5">Exposure</text>
+    <text x="228" y="146" fill="#dc2626" font-size="9.5" font-family="monospace">0.0.0.0/0</text>
+
+    <!-- Head 4 -->
+    <rect x="326" y="100" width="98" height="58" rx="4" fill="#f8fafc" stroke="#e2e8f0"/>
+    <text x="332" y="116" fill="#0f172a" font-size="10.5" font-weight="600">Blast Radius</text>
+    <text x="332" y="128" fill="#64748b" font-size="9.5">Scope Target</text>
+    <text x="332" y="146" fill="#ea580c" font-size="9.5" font-family="monospace">VPC_WIDE</text>
+
+    <!-- Head 5 -->
+    <rect x="430" y="100" width="100" height="58" rx="4" fill="#f8fafc" stroke="#e2e8f0"/>
+    <text x="436" y="116" fill="#0f172a" font-size="10.5" font-weight="600">Injection</text>
+    <text x="436" y="128" fill="#64748b" font-size="9.5">Anomaly</text>
+    <text x="436" y="146" fill="#9333ea" font-size="9.5" font-family="monospace">Payload tag</text>
+
+    <!-- Question Contract -->
+    <rect x="14" y="168" width="516" height="58" rx="4" fill="#f0f9ff" stroke="#bae6fd"/>
+    <text x="24" y="186" fill="#0369a1" font-size="11" font-weight="700">Calibrated Typed Question Contract (Zero Fuzzy Free-Form Text):</text>
+    <text x="24" y="202" fill="#0c4a6e" font-size="11" font-style="italic">"Does this proposed remediation mutate stateful resources or exceed least privilege?"</text>
+    <text x="24" y="218" fill="#0284c7" font-size="10" font-weight="600">Confidence Threshold: &gt;= 85.0% Fail-Closed Boundary (NIST AI RMF 1.0)</text>
+  </g>
+
+  <!-- Sub-block 3: Dual Verdict Paths -->
+  <!-- Path 1: HALT (Red) -->
+  <g transform="translate(390, 550)">
+    <rect x="0" y="0" width="264" height="120" rx="6" fill="url(#grad-gate-block)" stroke="#f87171" stroke-width="1.5"/>
+    <circle cx="24" cy="24" r="10" fill="#dc2626"/>
+    <path d="M 20 20 L 28 28 M 28 20 L 20 28" stroke="#ffffff" stroke-width="2"/>
+    <text x="42" y="28" fill="#991515" font-size="12.5" font-weight="700">GATE / HALT (Blocked)</text>
+    <text x="14" y="52" fill="#7f1d1d" font-size="10.5">• High Risk (&gt;= 0.85) or Error</text>
+    <text x="14" y="68" fill="#7f1d1d" font-size="10.5">• Enforces Break-Glass MFA Token</text>
+    <text x="14" y="84" fill="#7f1d1d" font-size="10.5">• ZERO Packets Dispatched to AWS</text>
+    <rect x="12" y="94" width="240" height="18" rx="3" fill="#ffffff" stroke="#fca5a5"/>
+    <text x="132" y="107" text-anchor="middle" fill="#dc2626" font-size="9.5" font-family="monospace">Raises GuardrailBlockedError</text>
+  </g>
+
+  <!-- Path 2: PERMIT (Green) -->
+  <g transform="translate(670, 550)">
+    <rect x="0" y="0" width="264" height="120" rx="6" fill="url(#grad-gate-pass)" stroke="#4ade80" stroke-width="1.5"/>
+    <circle cx="24" cy="24" r="10" fill="#16a34a"/>
+    <path d="M 19 24 L 23 28 L 30 20" fill="none" stroke="#ffffff" stroke-width="2"/>
+    <text x="42" y="28" fill="#14532d" font-size="12.5" font-weight="700">PERMIT (Auto-Remediate)</text>
+    <text x="14" y="52" fill="#14532d" font-size="10.5">• Bounded, Isolated &amp; Confident</text>
+    <text x="14" y="68" fill="#14532d" font-size="10.5">• Boto3 Execution in &lt;1.0s</text>
+    <text x="14" y="84" fill="#14532d" font-size="10.5">• Generates Declarative Terraform</text>
+    <rect x="12" y="94" width="240" height="18" rx="3" fill="#ffffff" stroke="#86efac"/>
+    <text x="132" y="107" text-anchor="middle" fill="#15803d" font-size="9.5" font-family="monospace">SHA-256 Receipt Generated</text>
+  </g>
+
+  <!-- Sub-block 4: Declarative IaC Patch Engine & Ledger (Bottom) -->
+  <g transform="translate(390, 680)">
+    <rect x="0" y="0" width="544" height="82" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2"/>
+    <!-- Terraform Icon Badge -->
+    <rect x="12" y="12" width="28" height="28" rx="4" fill="#f5f3ff"/>
+    <path d="M 21 18 L 26 21 L 26 27 L 21 24 Z M 27 22 L 32 25 L 32 31 L 27 28 Z" fill="#7c3aed"/>
+    <text x="48" y="26" fill="#0f172a" font-size="12" font-weight="700">Declarative Terraform IaC Patch Engine &amp; State Rollback Engine</text>
+    <text x="48" y="42" fill="#64748b" font-size="10.5">Emits git diff against infra/*.tf to prevent out-of-band state drift · Tracks SHA-256 receipts</text>
+    
+    <rect x="14" y="52" width="256" height="20" rx="3" fill="#f8fafc" stroke="#e2e8f0"/>
+    <text x="20" y="66" fill="#475569" font-size="9.5" font-family="monospace">aegis remediate --iac</text>
+    <rect x="280" y="52" width="250" height="20" rx="3" fill="#f8fafc" stroke="#e2e8f0"/>
+    <text x="286" y="66" fill="#475569" font-size="9.5" font-family="monospace">aegis rollback &lt;sha256_hash&gt;</text>
+  </g>
+
+  <!-- ===================================================================== -->
+  <!-- ZONE 3: PRODUCTION AWS CLOUD TARGETS (Right Column)                  -->
+  <!-- ===================================================================== -->
+  <rect x="990" y="128" width="406" height="644" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+  
+  <!-- VPC Boundary Box -->
+  <rect x="1006" y="144" width="374" height="474" rx="6" fill="#ffffff" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="5,4"/>
+  <!-- VPC Badge -->
+  <rect x="1018" y="154" width="130" height="22" rx="4" fill="#ede9fe"/>
+  <text x="1083" y="169" text-anchor="middle" fill="#6d28d9" font-size="11" font-weight="700">VPC: vpc-0a8f9c12</text>
+  <text x="1270" y="169" fill="#64748b" font-size="10.5">10.0.0.0/16</text>
+
+  <!-- AWS Target 1: EC2 Security Groups -->
+  <g transform="translate(1022, 186)">
+    <rect x="0" y="0" width="342" height="96" rx="6" fill="#ffffff" stroke="#e2e8f0" filter="url(#shadow-card)"/>
+    <!-- EC2 Icon Badge -->
+    <rect x="12" y="12" width="36" height="36" rx="6" fill="#ffedd5"/>
+    <path d="M 22 26 L 30 20 L 38 26 L 30 32 Z M 22 34 L 30 28 L 38 34 L 30 40 Z" fill="#ea580c"/>
+    <text x="56" y="28" fill="#0f172a" font-size="12.5" font-weight="600">EC2 Security Groups</text>
+    <text x="56" y="44" fill="#64748b" font-size="11">sg-008c3f4e07a0ff172 (Core SG)</text>
+    
+    <rect x="12" y="56" width="318" height="30" rx="3" fill="#f0fdf4" stroke="#86efac"/>
+    <text x="20" y="75" fill="#15803d" font-size="10.5" font-weight="600">Aegis-2B Fix: Surgical Port 22 Ingress Revocation</text>
+  </g>
+
+  <!-- AWS Target 2: VPC Route Tables -->
+  <g transform="translate(1022, 292)">
+    <rect x="0" y="0" width="342" height="96" rx="6" fill="#ffffff" stroke="#e2e8f0" filter="url(#shadow-card)"/>
+    <!-- Route Table Badge -->
+    <rect x="12" y="12" width="36" height="36" rx="6" fill="#ede9fe"/>
+    <circle cx="24" cy="30" r="4" fill="#7c3aed"/>
+    <circle cx="36" cy="30" r="4" fill="#7c3aed"/>
+    <path d="M 24 30 L 36 30" stroke="#7c3aed" stroke-width="2"/>
+    <text x="56" y="28" fill="#0f172a" font-size="12.5" font-weight="600">VPC Route Tables</text>
+    <text x="56" y="44" fill="#64748b" font-size="11">rtb-067d049b3b998fcd3 (Default Route)</text>
+
+    <rect x="12" y="56" width="318" height="30" rx="3" fill="#fef2f2" stroke="#fca5a5"/>
+    <text x="20" y="75" fill="#b91c1c" font-size="10.5" font-weight="600">Aegis-2B Guard: Default Route Tampering HALTED</text>
+  </g>
+
+  <!-- AWS Target 3: IAM Roles & Policies -->
+  <g transform="translate(1022, 398)">
+    <rect x="0" y="0" width="342" height="96" rx="6" fill="#ffffff" stroke="#e2e8f0" filter="url(#shadow-card)"/>
+    <!-- IAM Badge -->
+    <rect x="12" y="12" width="36" height="36" rx="6" fill="#ffe4e6"/>
+    <circle cx="30" cy="24" r="5" fill="#e11d48"/>
+    <path d="M 22 38 C 22 32 38 32 38 38 Z" fill="#e11d48"/>
+    <text x="56" y="28" fill="#0f172a" font-size="12.5" font-weight="600">IAM Roles &amp; Policies</text>
+    <text x="56" y="44" fill="#64748b" font-size="11">AWSServiceRoleForAccessAnalyzer</text>
+
+    <rect x="12" y="56" width="318" height="30" rx="3" fill="#fef2f2" stroke="#fca5a5"/>
+    <text x="20" y="75" fill="#b91c1c" font-size="10.5" font-weight="600">Aegis-2B Guard: AdministratorAccess Escalation BLOCKED</text>
+  </g>
+
+  <!-- AWS Target 4: S3 Bucket -->
+  <g transform="translate(1022, 504)">
+    <rect x="0" y="0" width="342" height="84" rx="6" fill="#ffffff" stroke="#e2e8f0" filter="url(#shadow-card)"/>
+    <!-- S3 Badge -->
+    <rect x="12" y="12" width="36" height="36" rx="6" fill="#dcfce7"/>
+    <ellipse cx="30" cy="24" rx="10" ry="4" fill="#15803d"/>
+    <path d="M 20 24 L 20 34 C 20 38 40 38 40 34 L 40 24 Z" fill="#15803d"/>
+    <text x="56" y="28" fill="#0f172a" font-size="12.5" font-weight="600">Amazon S3 (Data Stores)</text>
+    <text x="56" y="44" fill="#64748b" font-size="11">patient-records-prod (Encrypted)</text>
+    <text x="56" y="68" fill="#15803d" font-size="10.5" font-weight="600">Protected by Policy-as-Code always_halt</text>
+  </g>
+
+  <!-- GitOps Repository Target (Outside VPC) -->
+  <g transform="translate(1006, 630)">
+    <rect x="0" y="0" width="374" height="132" rx="6" fill="#ffffff" stroke="#cbd5e1" filter="url(#shadow-card)"/>
+    <rect x="0" y="0" width="374" height="26" rx="6" fill="#f8fafc"/>
+    <text x="14" y="18" fill="#0f172a" font-size="11.5" font-weight="700">GitOps &amp; Infrastructure-as-Code State</text>
+    
+    <!-- Git Diff Card -->
+    <rect x="12" y="36" width="350" height="82" rx="4" fill="#0f172a"/>
+    <text x="22" y="52" fill="#38bdf8" font-size="10" font-family="monospace">--- a/infra/security_groups.tf</text>
+    <text x="22" y="66" fill="#38bdf8" font-size="10" font-family="monospace">+++ b/infra/security_groups.tf</text>
+    <text x="22" y="80" fill="#f87171" font-size="10" font-family="monospace">-   cidr_blocks = ["0.0.0.0/0"]</text>
+    <text x="22" y="94" fill="#4ade80" font-size="10" font-family="monospace">+   cidr_blocks = ["10.0.0.0/8"]</text>
+    <text x="22" y="108" fill="#94a3b8" font-size="9" font-family="monospace">GitOps CI/CD PR created automatically</text>
+  </g>
+
+  <!-- Connector Zone 2 (PERMIT) to Zone 3 (AWS) -->
+  <path d="M 934 610 L 968 610 L 968 234 L 1022 234" fill="none" stroke="#16a34a" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+  <rect x="942" y="380" width="48" height="22" rx="3" fill="#ffffff" stroke="#86efac"/>
+  <text x="966" y="395" text-anchor="middle" fill="#15803d" font-size="10.5" font-weight="700">Boto3</text>
+
+  <!-- Connector Zone 2 (PERMIT) to GitOps -->
+  <path d="M 934 720 L 1006 720" fill="none" stroke="#7c3aed" stroke-width="2" marker-end="url(#arrow-purple)"/>
+  <rect x="946" y="708" width="46" height="18" rx="3" fill="#ffffff" stroke="#d8b4fe"/>
+  <text x="969" y="721" text-anchor="middle" fill="#7c3aed" font-size="10" font-weight="600">Patch</text>
+
+  <!-- Legend Bar (Bottom) -->
+  <g transform="translate(44, 782)">
+    <text x="0" y="10" fill="#64748b" font-size="11" font-weight="600">LEGEND:</text>
+    <circle cx="65" cy="6" r="4" fill="#2563eb"/>
+    <text x="75" y="10" fill="#475569" font-size="11">Alert / Ingestion</text>
+
+    <circle cx="180" cy="6" r="4" fill="#16a34a"/>
+    <text x="190" y="10" fill="#475569" font-size="11">Permitted Boto3 Mutation</text>
+
+    <circle cx="350" cy="6" r="4" fill="#dc2626"/>
+    <text x="360" y="10" fill="#475569" font-size="11">Pre-HTTP Circuit Breaker Halt</text>
+
+    <circle cx="545" cy="6" r="4" fill="#7c3aed"/>
+    <text x="555" y="10" fill="#475569" font-size="11">Terraform Declarative IaC Patch</text>
+  </g>
+</svg>

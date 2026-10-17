@@ -1,0 +1,73 @@
+<mxfile host="app.diagrams.net" agent="Aegis-2B Generator">
+  <diagram id="aegis-clean-separation-pipeline" name="Clean Separation Pipeline">
+    <mxGraphModel dx="1420" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1440" pageHeight="920" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0F172A;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=16;align=left;spacingLeft=20;" value="ARCHITECTURE: CLEAN SEPARATION OF RESPONSIBILITIES" vertex="1">
+          <mxGeometry x="40" y="20" width="1360" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Stage 0: Finding Stream -->
+        <mxCell id="s0" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CBD5E1;fontColor=#1E293B;fontSize=13;fontStyle=1;align=left;spacingLeft=20;" value="AWS Security Hub / GuardDuty ASFF Finding Stream (or live discovery: aegis scan --live)" vertex="1">
+          <mxGeometry x="40" y="90" width="1360" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Edge 0 -> 1 -->
+        <mxCell id="e0" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#2563EB;strokeWidth=3;" edge="1" source="s0" target="s1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Stage 1: Router -->
+        <mxCell id="s1" parent="1" style="swimlane;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2563EB;strokeWidth=2;fontColor=#1E40AF;fontStyle=1;fontSize=14;startSize=40;rounded=1;" value="STAGE 1: Local 2B Triage &amp; 3-Tier Router (patterns/guardrails/)" vertex="1">
+          <mxGeometry x="40" y="190" width="1360" height="190" as="geometry" />
+        </mxCell>
+
+        <mxCell id="t0" parent="s1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDF4;strokeColor=#86EFAC;fontColor=#15803D;fontSize=12;align=left;spacingLeft=15;" value="&lt;b&gt;Tier 0: Direct Rule (Direct Boto3)&lt;/b&gt;&#xa;• 0 Tokens · $0.00 Cost · 0.016ms Latency&#xa;• Whitelisted surgical fixes (revoke SSH port 22)&#xa;• &lt;b&gt;Bypasses LLM completely (saves 1,306 tokens)&lt;/b&gt;" vertex="1">
+          <mxGeometry x="20" y="55" width="410" height="110" as="geometry" />
+        </mxCell>
+
+        <mxCell id="t1" parent="s1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF6FF;strokeColor=#BFDBFE;fontColor=#1D4ED8;fontSize=12;align=left;spacingLeft=15;" value="&lt;b&gt;Tier 1: Fast Lane (Nova Micro / Haiku)&lt;/b&gt;&#xa;• Routine single-resource config updates&#xa;• Strips heavy reasoning prompts (~80% token savings)&#xa;• Fast sub-second generative planning" vertex="1">
+          <mxGeometry x="475" y="55" width="410" height="110" as="geometry" />
+        </mxCell>
+
+        <mxCell id="t2" parent="s1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDF4FF;strokeColor=#F0ABFC;fontColor=#86198F;fontSize=12;align=left;spacingLeft=15;" value="&lt;b&gt;Tier 2: Cognitive Lane (Claude 3.5 Sonnet)&lt;/b&gt;&#xa;• Multi-resource graph reasoning &amp; IAM policy changes&#xa;• Deep investigation for anomalies&#xa;• &lt;b&gt;High-risk calls require Break-Glass MFA Gate&lt;/b&gt;" vertex="1">
+          <mxGeometry x="930" y="55" width="410" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- Edge 1 -> 2 -->
+        <mxCell id="e1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#059669;strokeWidth=3;" edge="1" source="s1" target="s2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Stage 2: Hook -->
+        <mxCell id="s2" parent="1" style="swimlane;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#059669;strokeWidth=2;fontColor=#065F46;fontStyle=1;fontSize=14;startSize=40;rounded=1;" value="STAGE 2: Botocore Pre-HTTP Hook Airbag (before-parameter-build.*.*)" vertex="1">
+          <mxGeometry x="40" y="420" width="1360" height="180" as="geometry" />
+        </mxCell>
+
+        <mxCell id="norm" parent="s2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#CBD5E1;fontColor=#334155;fontSize=12;align=left;spacingLeft=15;" value="&lt;b&gt;Input Deobfuscation (_deobfuscate):&lt;/b&gt;&#xa;• Strips zero-width Unicode (U+200B..F, U+FEFF)&#xa;• Decodes URL-encoded evasion (%30.0.0.0%2f0)&#xa;• &lt;b&gt;Neutralizes MITRE ATLAS AML.T0051 Evasion&lt;/b&gt;" vertex="1">
+          <mxGeometry x="20" y="55" width="600" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dec" parent="s2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0F9FF;strokeColor=#BAE6FD;fontColor=#0369A1;fontSize=12;align=left;spacingLeft=15;" value="&lt;b&gt;Strands Decider 2B (0.016ms Schema Eval / 0.505ms Hook Block):&lt;/b&gt;&#xa;• 5-Heads: Destructive Verbs | IAM Escalation | Network Ingress | Blast Radius | Prompt Injection&#xa;• Composite Risk = max(w1·R1, ..., w5·R5)&#xa;• &lt;b&gt;Fail-Closed Invariant: Halts if Risk &gt;= 0.50 or Confidence &lt; 0.85&lt;/b&gt;" vertex="1">
+          <mxGeometry x="650" y="55" width="690" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Edge 2 -> 3 -->
+        <mxCell id="e2" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#0F172A;strokeWidth=3;" edge="1" source="s2" target="v_halt">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Stage 3: Verdicts -->
+        <mxCell id="v_halt" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF2F2;strokeColor=#DC2626;strokeWidth=2;fontColor=#991515;fontSize=12;align=left;spacingLeft=15;" value="&lt;b&gt;FAIL CLOSED: HALT (High Risk / Low Confidence &lt; 0.85)&lt;/b&gt;&#xa;• Raises GuardrailBlockedError pre-HTTP in 0.505 ms&#xa;• ZERO packets sent to AWS API (Resource protected)&#xa;• Cryptographic SHA-256 HMAC receipt recorded&#xa;• &lt;b&gt;Demands Break-Glass MFA Token to authorize override&lt;/b&gt;" vertex="1">
+          <mxGeometry x="40" y="640" width="660" height="180" as="geometry" />
+        </mxCell>
+
+        <mxCell id="v_permit" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDF4;strokeColor=#16A34A;strokeWidth=2;fontColor=#14532D;fontSize=12;align=left;spacingLeft=15;" value="&lt;b&gt;PERMIT AUTO-REMEDIATION (Safe &amp; Bounded &gt;= 0.85)&lt;/b&gt;&#xa;• Dispatches surgical Boto3 mutation to AWS Control Plane&#xa;• Generates ready-to-commit Terraform HCL git diff patch&#xa;• Eliminates out-of-band IaC state drift&#xa;• &lt;b&gt;Supports instant state rollback via aegis rollback&lt;/b&gt;" vertex="1">
+          <mxGeometry x="740" y="640" width="660" height="180" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

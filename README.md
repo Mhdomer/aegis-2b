@@ -58,20 +58,14 @@ Aegis-2B solves this by splitting responsibilities into two distinct models:
 
 ## The Big Picture: Scanner vs. Agent vs. Circuit Breaker
 
-To understand where Aegis-2B sits in an enterprise security workflow:
+<p align="center">
+  <img src="docs/images/aegis-scanner-vs-agent-breaker.png" alt="The Big Picture: Scanner vs Agent vs Circuit Breaker" width="100%" />
+</p>
+<p align="center">
+  <em>Visual Diagram Sources: <a href="docs/images/aegis-scanner-vs-agent-breaker.drawio">Draw.io (.drawio)</a> · <a href="docs/images/aegis-scanner-vs-agent-breaker.excalidraw">Excalidraw (.excalidraw)</a></em>
+</p>
 
-```text
-┌─────────────────────────┐       ┌─────────────────────────┐       ┌─────────────────────────┐
-│     1. THE SCANNER      │       │     2. THE AI AGENT     │       │   3. AEGIS-2B AIRBAG    │
-│ (GuardDuty / Prowler /  │ ───►  │ (Bedrock Claude Sonnet  │ ───►  │  (Local Decider 2B in   │
-│    aegis scan --live)   │       │   autonomous planner)   │       │  Botocore pre-HTTP hook)│
-└─────────────────────────┘       └─────────────────────────┘       └─────────────────────────┘
-        Detection                         Intention                          Enforcement
-   "Hey, port 22 is open            "I will plan an API call         "Hold on! Is this action
-   on sg-core, and someone           to fix it... or maybe            safe? 0.016 ms check:
-   sent a poisoned alert."           I delete sg-core by mistake!"    Permit fix, or halt rogue
-                                                                      deletion before AWS API!"
-```
+To understand where Aegis-2B sits in an enterprise security workflow:
 
 - **1. The Detection Layer (Scanner):** Tools like AWS GuardDuty, Security Hub, Prowler, or `aegis scan --live` detect vulnerabilities: *"Security Group sg-core has world-open port 22."* Scanners do not fix problems.
 - **2. The Cognitive Layer (Autonomous Agent):** Generative models (e.g. Claude 3.5 Sonnet on Amazon Bedrock) ingest alerts and plan remediation tool calls. If the agent hallucinates or gets manipulated by prompt injection, it may attempt a catastrophic mutation like deleting the security group.
@@ -120,9 +114,23 @@ uvx aegis-2b remediate --iac
 
 ## System Architecture
 
-![Aegis-2B Production AWS Architecture](docs/images/aegis-aws-architecture.drawio.png)
-<p align="center"><em>Architecture Views: <a href="docs/images/aegis-aws-architecture.drawio.png">AWS Component Icons (Draw.io)</a> · <a href="docs/images/aegis-aws-architecture-exceldraw.png">Whiteboard Sketch (Excalidraw)</a> · Source Files: <a href="docs/images/aegis-aws-architecture.drawio">.drawio</a> / <a href="docs/images/aegis-aws-architecture.excalidraw">.excalidraw</a></em></p>
+### 1. 3-Stage Decision Pipeline & Pre-HTTP Airbag
+<p align="center">
+  <img src="docs/images/aegis-clean-separation-pipeline.png" alt="Aegis-2B 3-Stage Decision Pipeline" width="100%" />
+</p>
+<p align="center">
+  <em>Pipeline Diagram Sources: <a href="docs/images/aegis-clean-separation-pipeline.drawio">Draw.io (.drawio)</a> · <a href="docs/images/aegis-clean-separation-pipeline.excalidraw">Excalidraw (.excalidraw)</a></em>
+</p>
 
+### 2. Production AWS Cloud Architecture & Data Flow
+<p align="center">
+  <img src="docs/images/aegis-production-aws-dataflow.png" alt="Aegis-2B Production AWS Architecture" width="100%" />
+</p>
+<p align="center">
+  <em>Architecture Views: <a href="docs/images/aegis-production-aws-dataflow.drawio">Draw.io (.drawio)</a> · <a href="docs/images/aegis-production-aws-dataflow.excalidraw">Excalidraw (.excalidraw)</a> · <a href="docs/images/aegis-aws-architecture-exceldraw.png">Whiteboard Sketch</a></em>
+</p>
+
+### 3. Web Operations Center
 ![Aegis-2B Web Operations Center](docs/images/aegis-web-dashboard.png)
 
 ### Production AWS Architecture & Data Flow

@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 920" width="100%" height="100%" style="background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <defs>
+    <filter id="shadow-card2" x="-4%" y="-4%" width="108%" height="110%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.06"/>
+    </filter>
+    <marker id="arrow-down-blue" viewBox="0 0 10 10" refX="5" refY="8" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 1 0 L 5 10 L 9 0 z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-down-green" viewBox="0 0 10 10" refX="5" refY="8" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 1 0 L 5 10 L 9 0 z" fill="#059669"/>
+    </marker>
+    <marker id="arrow-down-red" viewBox="0 0 10 10" refX="5" refY="8" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 1 0 L 5 10 L 9 0 z" fill="#dc2626"/>
+    </marker>
+  </defs>
+
+  <!-- Title Banner -->
+  <rect x="40" y="20" width="1360" height="56" rx="8" fill="#0f172a"/>
+  <text x="65" y="55" fill="#ffffff" font-size="18" font-weight="700">ARCHITECTURE: CLEAN SEPARATION OF RESPONSIBILITIES</text>
+  <text x="1375" y="55" fill="#94a3b8" font-size="12" font-weight="600" text-anchor="end">3-Stage Autonomous Decision Pipeline &amp; Botocore Circuit Breaker</text>
+
+  <!-- Stage 0: Finding Stream -->
+  <rect x="40" y="95" width="1360" height="70" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" filter="url(#shadow-card2)"/>
+  <rect x="60" y="110" width="220" height="40" rx="6" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="170" y="135" fill="#1e40af" font-size="13" font-weight="700" text-anchor="middle">AWS Security Alert Stream</text>
+  <text x="310" y="135" fill="#334155" font-size="13">Ingests AWS Security Hub ASFF JSON, Amazon GuardDuty findings, or live inventory discovery (aegis scan --live)</text>
+
+  <!-- Arrow down to Stage 1 -->
+  <path d="M 720 165 L 720 205" stroke="#2563eb" stroke-width="3" fill="none" marker-end="url(#arrow-down-blue)"/>
+
+  <!-- Stage 1: 3-Tier Router -->
+  <rect x="40" y="210" width="1360" height="195" rx="10" fill="#ffffff" stroke="#2563eb" stroke-width="2" filter="url(#shadow-card2)"/>
+  <rect x="60" y="225" width="460" height="32" rx="4" fill="#eff6ff"/>
+  <text x="75" y="247" fill="#1e40af" font-size="14" font-weight="700">STAGE 1: Local 2B Triage &amp; 3-Tier Router (patterns/guardrails/)</text>
+
+  <!-- 3 Router Boxes -->
+  <!-- Tier 0 -->
+  <rect x="60" y="270" width="420" height="115" rx="8" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+  <rect x="75" y="285" width="110" height="24" rx="4" fill="#16a34a"/>
+  <text x="130" y="301" fill="#ffffff" font-size="11" font-weight="800" text-anchor="middle">TIER 0: RULE</text>
+  <text x="200" y="302" fill="#14532d" font-size="13" font-weight="700">Direct Boto3 Mutation</text>
+  <text x="75" y="335" fill="#166534" font-size="12">• 0 LLM Tokens · $0.00 Cost · 0.016ms Latency</text>
+  <text x="75" y="355" fill="#166534" font-size="12">• Deterministic whitelisted fixes (e.g. revoke SSH port 22)</text>
+  <text x="75" y="375" fill="#15803d" font-weight="600" font-size="11">✓ Bypasses cloud LLM completely (Saves 1,306 tokens)</text>
+
+  <!-- Tier 1 -->
+  <rect x="510" y="270" width="420" height="115" rx="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+  <rect x="525" y="285" width="110" height="24" rx="4" fill="#2563eb"/>
+  <text x="580" y="301" fill="#ffffff" font-size="11" font-weight="800" text-anchor="middle">TIER 1: FAST</text>
+  <text x="650" y="302" fill="#1e40af" font-size="13" font-weight="700">Amazon Nova Micro / Haiku</text>
+  <text x="525" y="335" fill="#1e40af" font-size="12">• Routine single-resource configuration updates</text>
+  <text x="525" y="355" fill="#1e40af" font-size="12">• Strips heavy prompt scaffolding (~80% token savings)</text>
+  <text x="525" y="375" fill="#2563eb" font-weight="600" font-size="11">✓ Low latency lightweight generative planning</text>
+
+  <!-- Tier 2 -->
+  <rect x="960" y="270" width="420" height="115" rx="8" fill="#fdf4ff" stroke="#f0abfc" stroke-width="1.5"/>
+  <rect x="975" y="285" width="110" height="24" rx="4" fill="#9333ea"/>
+  <text x="1030" y="301" fill="#ffffff" font-size="11" font-weight="800" text-anchor="middle">TIER 2: HEAVY</text>
+  <text x="1100" y="302" fill="#701a75" font-size="13" font-weight="700">Claude 3.5 Sonnet + MFA Gate</text>
+  <text x="975" y="335" fill="#701a75" font-size="12">• Multi-resource graph reasoning &amp; IAM policy changes</text>
+  <text x="975" y="355" fill="#701a75" font-size="12">• VPC-wide route modifications &amp; anomaly investigation</text>
+  <text x="975" y="375" fill="#9333ea" font-weight="600" font-size="11">⚠ High risk actions require cryptographic Break-Glass MFA</text>
+
+  <!-- Arrow down to Stage 2 -->
+  <path d="M 720 405 L 720 445" stroke="#059669" stroke-width="3" fill="none" marker-end="url(#arrow-down-green)"/>
+
+  <!-- Stage 2: Botocore Hook -->
+  <rect x="40" y="450" width="1360" height="190" rx="10" fill="#ffffff" stroke="#059669" stroke-width="2" filter="url(#shadow-card2)"/>
+  <rect x="60" y="465" width="560" height="32" rx="4" fill="#ecfdf5"/>
+  <text x="75" y="487" fill="#065f46" font-size="14" font-weight="700">STAGE 2: Botocore Pre-HTTP Airbag Interceptor (before-parameter-build.*.*)</text>
+
+  <!-- Hook Sub-blocks -->
+  <rect x="60" y="510" width="600" height="110" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="80" y="535" fill="#0f172a" font-size="13" font-weight="700">Input Deobfuscation &amp; Normalization (_deobfuscate)</text>
+  <text x="80" y="560" fill="#475569" font-size="12">• Strips zero-width Unicode characters (U+200B..U+200F, U+FEFF)</text>
+  <text x="80" y="580" fill="#475569" font-size="12">• Decodes URL-encoded evasion (e.g. %30.0.0.0%2f0 -&gt; 0.0.0.0/0)</text>
+  <text x="80" y="600" fill="#15803d" font-weight="600" font-size="12">✓ Defeats MITRE ATLAS AML.T0051 &amp; OWASP LLM01 Evasion</text>
+
+  <rect x="680" y="510" width="700" height="110" rx="6" fill="#f0f9ff" stroke="#bae6fd"/>
+  <text x="700" y="535" fill="#0369a1" font-size="13" font-weight="700">Strands Decider 2B (~115ms Local Gate / 0.016ms Schema Eval)</text>
+  <text x="700" y="560" fill="#0c4a6e" font-size="12">Evaluates 5-Heads: Destructive Mutation | IAM Escalation | Network Ingress | Blast Radius | Prompt Injection</text>
+  <text x="700" y="582" fill="#0c4a6e" font-size="12">Mathematical Formula: Composite Risk = max(w1·R_destructive, ..., w5·R_injection)</text>
+  <text x="700" y="604" fill="#0284c7" font-weight="700" font-size="12">Fail-Closed Invariant: Halts if Risk &gt;= 0.50 or Confidence &lt; 0.85</text>
+
+  <!-- Arrow down to Stage 3 -->
+  <path d="M 720 640 L 720 675" stroke="#0f172a" stroke-width="3" fill="none" marker-end="url(#arrow-down-blue)"/>
+
+  <!-- Stage 3: Dual Verdict & GitOps -->
+  <g transform="translate(40, 680)">
+    <!-- Path A: Blocked -->
+    <rect width="665" height="185" rx="10" fill="#fff5f5" stroke="#dc2626" stroke-width="2" filter="url(#shadow-card2)"/>
+    <rect x="20" y="18" width="130" height="28" rx="4" fill="#dc2626"/>
+    <text x="85" y="37" fill="#ffffff" font-size="12" font-weight="800" text-anchor="middle">FAIL CLOSED</text>
+    <text x="165" y="38" fill="#991515" font-size="15" font-weight="700">High Risk or Low Confidence (&lt; 0.85)</text>
+
+    <text x="25" y="75" fill="#7f1d1d" font-size="13" font-weight="700">Raises GuardrailBlockedError pre-HTTP in 0.505 ms</text>
+    <text x="25" y="100" fill="#991515" font-size="12">• ZERO packets reach AWS API; targeted cloud resource remains untouched</text>
+    <text x="25" y="122" fill="#991515" font-size="12">• Generates immutable SHA-256 HMAC cryptographic audit receipt</text>
+    <text x="25" y="144" fill="#991515" font-size="12">• Demands human break-glass MFA token (e.g. 849201) to authorize override</text>
+    <text x="25" y="166" fill="#dc2626" font-weight="700" font-size="11">✓ Protects production against rogue deletion &amp; indirect prompt injection</text>
+
+    <!-- Path B: Permitted -->
+    <rect x="695" width="665" height="185" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="2" filter="url(#shadow-card2)"/>
+    <rect x="715" y="18" width="140" height="28" rx="4" fill="#16a34a"/>
+    <text x="785" y="37" fill="#ffffff" font-size="12" font-weight="800" text-anchor="middle">PERMIT REMEDIATE</text>
+    <text x="870" y="38" fill="#14532d" font-size="15" font-weight="700">Safe &amp; Bounded Action (&gt;= 0.85)</text>
+
+    <text x="715" y="75" fill="#14532d" font-size="13" font-weight="700">Dispatches Boto3 Mutation + Generates Terraform HCL</text>
+    <text x="715" y="100" fill="#166534" font-size="12">• Executes surgical API call (e.g. revoke SSH ingress on port 22)</text>
+    <text x="715" y="122" fill="#166534" font-size="12">• Emits ready-to-commit git diff against infra/*.tf (aegis remediate --iac)</text>
+    <text x="715" y="144" fill="#166534" font-size="12">• Eliminates Terraform state drift between GitOps code and live cloud reality</text>
+    <text x="715" y="166" fill="#15803d" font-weight="700" font-size="11">✓ Instant state rollback supported via aegis rollback &lt;receipt-hash&gt;</text>
+  </g>
+
+  <!-- Footer -->
+  <rect x="40" y="880" width="1360" height="28" fill="#f1f5f9" rx="4"/>
+  <text x="60" y="899" fill="#64748b" font-size="11">Aegis-2B Cloud Safety Framework · Author: Mohamed Makhlouf (@mhdomer) · Riyadh, Saudi Arabia</text>
+  <text x="1380" y="899" fill="#64748b" font-size="11" text-anchor="end">Live Web Console: mhdomer.github.io/aegis-2b · Code: github.com/Mhdomer/aegis-2b</text>
+</svg>
