@@ -392,22 +392,16 @@ def run_live_aws_test(
             )
         )
 
+        from botocore import UNSIGNED
+        from botocore.config import Config
+
         guardrail = DeciderCloudGuardrail(simulate_local_latency=False)
+        unsigned_cfg = Config(signature_version=UNSIGNED)
         ec2 = guardrail.protect_boto3_client(
-            boto3.client(
-                "ec2",
-                region_name=conn["region"],
-                aws_access_key_id="AKIAIOSFODNN7EXAMPLE",
-                aws_secret_access_key="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-            )
+            boto3.client("ec2", region_name=conn["region"], config=unsigned_cfg)
         )
         iam = guardrail.protect_boto3_client(
-            boto3.client(
-                "iam",
-                region_name=conn["region"],
-                aws_access_key_id="AKIAIOSFODNN7EXAMPLE",
-                aws_secret_access_key="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-            )
+            boto3.client("iam", region_name=conn["region"], config=unsigned_cfg)
         )
 
         results_table = Table(
@@ -747,21 +741,23 @@ def broadcast_live_event_to_ui(event_payload: Dict[str, Any], port: int = 8765) 
     Aegis-2B Web UI server (http://127.0.0.1:8765/api/ingest-event) so any terminal
     or production Python script activity immediately reflects on the browser UI.
     """
+    import http.client
     import json
     import os
-    import urllib.request
 
     if "PYTEST_CURRENT_TEST" in os.environ:
         return
 
     try:
-        req = urllib.request.Request(
-            f"http://127.0.0.1:{port}/api/ingest-event",
-            data=json.dumps(event_payload).encode("utf-8"),
+        conn = http.client.HTTPConnection("127.0.0.1", port, timeout=0.15)
+        conn.request(
+            "POST",
+            "/api/ingest-event",
+            body=json.dumps(event_payload).encode("utf-8"),
             headers={"Content-Type": "application/json"},
-            method="POST",
         )
-        urllib.request.urlopen(req, timeout=0.15)
+        conn.getresponse().read()
+        conn.close()
     except Exception:
         pass
 

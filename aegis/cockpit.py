@@ -228,8 +228,8 @@ class AegisCockpit:
         if push_to_web:
             self._notify_web_server(scenario_type)
 
-    def trigger_break_glass(self, token: str = "849201", push_to_web: bool = True):
-        if verify_break_glass_token(token):
+    def trigger_break_glass(self, mfa_code: str = "849201", push_to_web: bool = True):
+        if verify_break_glass_token(mfa_code):
             state = DeciderState(
                 alert_source="aws.securityhub",
                 alert_severity="HIGH",
@@ -239,7 +239,7 @@ class AegisCockpit:
                 blast_radius=BlastRadius.VPC_WIDE,
             )
             decider_res = self.guardrail.evaluate(state)
-            receipt = self.dispatcher.dispatch(state, decider_res, break_glass_token=token, operator_id="sec-ops-admin")
+            receipt = self.dispatcher.dispatch(state, decider_res, break_glass_token=mfa_code, operator_id="sec-ops-admin")
 
             self.last_decision = {
                 "scenario": "BREAK_GLASS",
@@ -252,11 +252,11 @@ class AegisCockpit:
                 "status": receipt.execution_status,
                 "raw_scores": decider_res.raw_scores,
             }
-            self._add_log("OVERRIDE", "green", f"MFA token [{token}] verified! Route mutation authorized.")
+            self._add_log("OVERRIDE", "green", f"MFA token [{mfa_code}] verified! Route mutation authorized.")
             if push_to_web:
-                self._notify_web_server("blast_radius", token=token)
+                self._notify_web_server("blast_radius", token=mfa_code)
         else:
-            self._add_log("REJECT", "red", f"Invalid Break-Glass token [{token}].")
+            self._add_log("REJECT", "red", f"Invalid Break-Glass token [{mfa_code}].")
 
     def reset_state(self, push_to_web: bool = True):
         self.dispatcher = AWSActionDispatcher()
@@ -284,9 +284,11 @@ class AegisCockpit:
         self._add_log("RESET", "cyan", "Resources restored to default baseline. Port 22 open.")
         if push_to_web:
             try:
-                import urllib.request
-                req = urllib.request.Request("http://127.0.0.1:8765/api/reset", method="POST")
-                urllib.request.urlopen(req, timeout=0.15)
+                import http.client
+                conn = http.client.HTTPConnection("127.0.0.1", 8765, timeout=0.15)
+                conn.request("POST", "/api/reset")
+                conn.getresponse().read()
+                conn.close()
             except Exception:
                 pass
 
@@ -299,25 +301,31 @@ class AegisCockpit:
 
     def _notify_web_server(self, scenario: str, token: Optional[str] = None):
         try:
-            import urllib.request
-            endpoint = "http://127.0.0.1:8765/api/break-glass" if token else "http://127.0.0.1:8765/api/evaluate"
+            import http.client
+            path = "/api/break-glass" if token else "/api/evaluate"
             payload = {"scenario": scenario} if not token else {"scenario": scenario, "token": token, "operator": "sec-ops-admin"}
-            req = urllib.request.Request(
-                endpoint,
-                data=json.dumps(payload).encode("utf-8"),
+            conn = http.client.HTTPConnection("127.0.0.1", 8765, timeout=0.15)
+            conn.request(
+                "POST",
+                path,
+                body=json.dumps(payload).encode("utf-8"),
                 headers={"Content-Type": "application/json"},
             )
-            with urllib.request.urlopen(req, timeout=0.15) as resp:
-                pass
+            conn.getresponse().read()
+            conn.close()
         except Exception:
             pass
 
     def poll_web_events(self) -> bool:
         """Polls local Web Operations Center for bidirectional synchronization."""
         try:
-            import urllib.request
-            with urllib.request.urlopen("http://127.0.0.1:8765/api/latest-event", timeout=0.05) as resp:
+            import http.client
+            conn = http.client.HTTPConnection("127.0.0.1", 8765, timeout=0.05)
+            conn.request("GET", "/api/latest-event")
+            resp = conn.getresponse()
+            if resp.status == 200:
                 data = json.loads(resp.read().decode("utf-8"))
+                conn.close()
                 ev_id = data.get("event_id", 0)
                 if ev_id > self.last_seen_web_event_id:
                     self.last_seen_web_event_id = ev_id

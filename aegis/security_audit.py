@@ -231,8 +231,11 @@ def run_security_self_audit_data() -> Dict[str, Any]:
     })
 
     # 10. Botocore Pre-Network Hook & Tamper-Evident SHA-256 Receipt Integrity
+    from botocore import UNSIGNED
+    from botocore.config import Config
+
     ec2_client = guardrail.protect_boto3_client(
-        boto3.client("ec2", region_name="us-east-1", aws_access_key_id="test", aws_secret_access_key="test")
+        boto3.client("ec2", region_name="us-east-1", config=Config(signature_version=UNSIGNED))
     )
     hook_blocked = False
     t10 = time.perf_counter()

@@ -178,9 +178,9 @@ def run_protect_command(
     t.add_row("[bold white]Parameters:[/bold white]", f"[dim]{json.dumps(params)}[/dim]")
     t.add_row("[bold white]Blast Radius:[/bold white]", f"[yellow]{blast.value}[/yellow]")
     t.add_row("[bold white]Destructive Flag:[/bold white]", "[bold red]YES[/bold red]" if is_destructive else "[green]NO[/green]")
-    t.add_row("[bold white]Safety Engine:[/bold white]", "Strands Decider 2B (~115ms Local Gate)")
+    t.add_row("[bold white]Safety Engine:[/bold white]", "Strands Decider 2B (Local Gate)")
     t.add_row("[bold white]Typed Question:[/bold white]", f"[italic dim]{DeciderCloudGuardrail.TYPED_QUESTION}[/italic dim]")
-    t.add_row("[bold white]Evaluation Latency:[/bold white]", f"[bold cyan]{res.latency_ms:.1f} ms[/bold cyan]")
+    t.add_row("[bold white]Evaluation Latency:[/bold white]", f"[bold cyan]{res.latency_ms:.3f} ms[/bold cyan]")
     t.add_row("[bold white]Confidence Score:[/bold white]", f"[bold green]{res.confidence:.1%}[/bold green] [dim](Threshold ≥ 85.0%)[/dim]")
 
     if is_permitted:
@@ -197,7 +197,7 @@ def run_protect_command(
     t.add_row("[bold white]Reasoning Code:[/bold white]", f"[bold white]{res.reasoning_code}[/bold white]")
 
     console.print()
-    console.print(Panel(t, title="[bold white]🛡️ Aegis-2B Sub-Second Action Evaluation[/bold white]", border_style=border_style))
+    console.print(Panel(t, title="[bold white]Aegis-2B Sub-Second Action Evaluation[/bold white]", border_style=border_style))
     console.print()
 
     if not is_permitted and interactive:
@@ -205,7 +205,7 @@ def run_protect_command(
         if token and verify_break_glass_token(token):
             dispatcher = AWSActionDispatcher()
             dispatcher.dispatch(state, res, break_glass_token=token)
-            console.print(f"[bold green]✔ MFA Token [{token}] verified! Action authorized and dispatched to AWS Boto3.[/bold green]\n")
+            console.print(f"[bold green]MFA Token [{token}] verified! Action authorized and dispatched to AWS Boto3.[/bold green]\n")
         else:
             console.print("[bold red]Action remains halted. Zero AWS API calls dispatched to production.[/bold red]\n")
 
@@ -252,15 +252,15 @@ def run_scan_command(
     rules1 = sg1.get("rules", sg1.get("IngressRules", []))
     has_22 = any(r.get("port", r.get("Port")) == 22 for r in rules1)
     status1 = "[bold red]Port 22/tcp Exposed (0.0.0.0/0)[/bold red]" if has_22 else "[bold green]Port 22 Closed & Isolated[/bold green]"
-    table.add_row("sg-0123456789", "SecurityGroup", status1, "✔ Auto-Remediation (<115ms)")
+    table.add_row("sg-0123456789", "SecurityGroup", status1, "Auto-Remediation (Local Gate)")
 
-    table.add_row("sg-core-vpc-01", "SecurityGroup", "[bold green]PostgreSQL 16 (:5432) Secure[/bold green]", "🛡️ Shielded (Halt on Drop)")
+    table.add_row("sg-core-vpc-01", "SecurityGroup", "[bold green]PostgreSQL 16 (:5432) Secure[/bold green]", "Shielded (Halt on Drop)")
 
     rt = state["route_tables"]["rtb-core-vpc-01"]
     routes = rt.get("routes", rt.get("Routes", []))
     target = next((r.get("target", r.get("GatewayId")) for r in routes if r.get("cidr", r.get("DestinationCidrBlock")) == "0.0.0.0/0"), "NONE")
-    table.add_row("rtb-core-vpc-01", "RouteTable", f"0.0.0.0/0 -> {target}", "⚠️ Gated (MFA Required)")
-    table.add_row("patient-records-prod", "S3 Bucket", "[bold green]AES256 Encrypted (Private)[/bold green]", "🛡️ Shielded (Halt on Delete)")
+    table.add_row("rtb-core-vpc-01", "RouteTable", f"0.0.0.0/0 -> {target}", "Gated (MFA Required)")
+    table.add_row("patient-records-prod", "S3 Bucket", "[bold green]AES256 Encrypted (Private)[/bold green]", "Shielded (Halt on Delete)")
 
     footer = Table.grid(expand=True)
     footer.add_row(table)
@@ -269,7 +269,7 @@ def run_scan_command(
     )
 
     console.print()
-    console.print(Panel(footer, title="[bold white]☁️ Cloud Infrastructure Posture Scan (Sandbox Fallback)[/bold white]", border_style="cyan"))
+    console.print(Panel(footer, title="[bold white]Cloud Infrastructure Posture Scan (Sandbox Fallback)[/bold white]", border_style="cyan"))
     console.print()
 
 
@@ -303,7 +303,7 @@ def run_policy_command():
     )
 
     console.print()
-    console.print(Panel(t, title="[bold white]📜 Aegis-2B Policy-as-Code (aegis.yaml)[/bold white]", border_style="cyan"))
+    console.print(Panel(t, title="[bold white]Aegis-2B Policy-as-Code (aegis.yaml)[/bold white]", border_style="cyan"))
     console.print()
 
 
@@ -311,6 +311,11 @@ def main():
     parser = argparse.ArgumentParser(
         prog="aegis",
         description="Aegis-2B: Sub-Second Safety Circuit Breaker using Strands Decider 2B",
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="aegis-2b 0.2.0",
     )
     parser.add_argument(
         "--interactive",

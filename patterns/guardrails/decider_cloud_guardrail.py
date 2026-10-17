@@ -611,7 +611,7 @@ class DeciderCloudGuardrail:
         if "PYTEST_CURRENT_TEST" in os.environ:
             return
         try:
-            import urllib.request
+            import http.client
 
             payload = {
                 "scenario": "live_boto3_sdk",
@@ -634,13 +634,15 @@ class DeciderCloudGuardrail:
                 "raw_scores": result.raw_scores,
                 "execution_status": "EXECUTED" if permitted else "BLOCKED",
             }
-            req = urllib.request.Request(
-                "http://127.0.0.1:8765/api/ingest-event",
-                data=json.dumps(payload).encode("utf-8"),
+            conn = http.client.HTTPConnection("127.0.0.1", 8765, timeout=0.12)
+            conn.request(
+                "POST",
+                "/api/ingest-event",
+                body=json.dumps(payload).encode("utf-8"),
                 headers={"Content-Type": "application/json"},
-                method="POST",
             )
-            urllib.request.urlopen(req, timeout=0.12)
+            conn.getresponse().read()
+            conn.close()
         except Exception:
             pass
 
