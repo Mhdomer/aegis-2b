@@ -133,44 +133,6 @@ uvx aegis-2b remediate --iac
 ### 3. Web Operations Center
 ![Aegis-2B Web Operations Center](docs/images/aegis-web-dashboard.png)
 
-### Production AWS Architecture & Data Flow
-
-```text
-  [ AWS Security Hub / GuardDuty ]  ───────►  [ Amazon EventBridge ]
-                 │                                     │
-                 ▼ (ASFF Finding JSON)                 ▼
-  ┌────────────────────────────────────────────────────────────┐
-  │                    AEGIS-2B RUNTIME                        │
-  │                                                            │
-  │  1. 3-Tier Router & Cognitive Planner                      │
-  │     ├─ Tier 0: Direct Rule (0 tokens, $0.00) ────────────┐ │
-  │     ├─ Tier 1: Nova Micro / Haiku (Light Triage)         │ │
-  │     └─ Tier 2: Claude 3.5 Sonnet (Cognitive Planning)    │ │
-  │                                                          │ │
-  │  2. Botocore Pre-HTTP Hook (before-parameter-build.*.*)  │ │
-  │     ├─ Input Normalization (Unicode & URL Deobfuscation) │ │
-  │     └─ Calibrated 2B Gate (~115ms / 0.034ms Local Eval)  │ │
-  │                                                          │ │
-  │  3. Fail-Closed Circuit Breaker Boundary                 │ │
-  │     ├─ Confidence < 0.85 or Destructive Mutation?        │ │
-  │     │   └─► HALT: Enforce Break-Glass MFA Token          │ │
-  │     │       & Emit Audit Receipt (Zero AWS Packets)      │ │
-  │     │                                                    │ │
-  │     └─► PERMIT: Execute via Boto3                        │ │
-  │         ├─ Step A: Execute Mutation on AWS               │ │
-  │         ├─ Step B: Emit Declarative Terraform git diff   │ │
-  │         └─ Step C: Log SHA-256 Receipt to Audit Ledger   │ │
-  └──────────────────────────────┬─────────────────────────────┘
-                                 │
-                 ┌───────────────┴───────────────┐
-                 ▼                               ▼
-       [ Live AWS API Targets ]       [ GitOps & IaC State ]
-       • EC2 Security Groups          • infra/security_groups.tf
-       • VPC Route Tables             • infra/vpc_routing.tf
-       • IAM Roles & Policies         • infra/iam.tf
-       • S3 Bucket Policies           (Prevents Out-of-Band Drift)
-```
-
 ### Production AWS Deployment Topologies
 
 Aegis-2B supports three production integration topologies depending on how your team runs cloud agents:
