@@ -75,4 +75,46 @@ def test_server_custom_payload_evaluation():
     assert result["scenario"] == "custom"
     assert result["decision"] == "ENFORCE_BREAK_GLASS"
     assert result["is_destructive"] is True
+    assert "raw_scores" in result
     assert "receipt" in result
+
+    # Test Break-Glass override on the custom gated action
+    bg_res = handler._handle_break_glass("custom", "849201", "sec-ops-admin")
+    assert bg_res["is_authorized"] is True
+    assert bg_res["execution_status"] == "OVERRIDDEN_BREAK_GLASS"
+
+
+def test_server_safe_private_ingress_preset_executes():
+    handler = object.__new__(AegisAPIHandler)
+    payload = {
+        "tool": "authorize_security_group_ingress",
+        "params": {"GroupId": "sg-0123456789", "Port": 443, "CidrIp": "10.0.1.0/24"},
+        "is_destructive": False,
+        "blast_radius": "isolated",
+        "alert_desc": "Safe private HTTPS ingress",
+    }
+    result = handler._handle_custom_evaluate(payload)
+    assert result["decision"] == "PERMIT_AUTO_REMEDIATION"
+    assert result["execution_status"] == "EXECUTED"
+    assert result["recommended_tier"] == "tier_0_rule"
+    assert result["estimated_tokens_saved"] > 0
+    assert "--- a/infra/security_groups.tf" in result["terraform_diff"]
+
+
+def test_remediate_cli_json_output(capsys):
+    from aegis.remediate import run_remediate_cli
+
+    ok = run_remediate_cli(
+        input_path="scenarios/fixtures/benign_ssh_finding.json",
+        as_json=True,
+    )
+    assert ok is True
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert data["total_findings"] >= 1
+    assert data["total_tokens_saved"] >= 1000
+    first = data["items"][0]
+    assert first["router_output"]["tier"] == "tier_0_rule"
+    assert "--- a/infra/security_groups.tf" in first["terraform_diff"]
+
+
