@@ -27,10 +27,11 @@ jobs:
 
       - name: Prepare static site bundle
         run: |
-          mkdir -p _site
+          mkdir -p _site/docs
           cp ui/dashboard.html _site/index.html
           cp ui/dashboard.html _site/dashboard.html
           cp ui/logo.svg _site/logo.svg
+          cp -r docs/images _site/docs/
           touch _site/.nojekyll
 
       - name: Configure Pages

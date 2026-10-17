@@ -42,6 +42,11 @@ Aegis-2B solves these by placing a local, non-generative classifier and 3-tier r
   3. **Zero Standing Cloud Spend:** Operating in-process requires no deployed AWS infrastructure, no Lambda execution roles, and $0.00 in cloud costs, allowing the guardrail to run identically on developer laptops, inside CI/CD containers, and in production runtimes.
 - **Role Separation in Defense-in-Depth:** EventBridge remains ideal for upstream ingestion (forwarding GuardDuty ASFF findings to the agent) and downstream notifications (consuming Aegis-2B HMAC-SHA256 audit receipts to alert SecOps), while Aegis-2B acts as the synchronous, pre-network execution gatekeeper.
 
+### Decision 5: Cryptographic State Rollback Engine with Fail-Closed MFA Gating
+- Automated cloud remediation requires safe rollback. However, blindly reversing a fix (such as re-opening port 22 after revoking it) can re-introduce severe security vulnerabilities.
+- Aegis-2B records an immutable SHA-256 HMAC receipt for every executed mutation into a persistent audit ledger (`.aegis_receipts.json`).
+- When `aegis rollback <sha256_hash>` is invoked, the dispatcher derives the exact inverse operation (`authorize_security_group_ingress`) and evaluates it through Strands Decider 2B. If re-opening the exposure is flagged as high risk, it strictly halts and requires a Break-Glass MFA token (`--token BG-SEC-911`) before the inverse mutation executes.
+
 ---
 
 ## 3. Empirical Benchmark Log (Measured 2026-10-17)
@@ -84,3 +89,8 @@ Executed via `uv run aegis test-aws` and `uv run aegis remediate --iac` against 
   - `LIVE-03` (`replace_route` `0.0.0.0/0` on `rtb-067d049b3b998fcd3`): Classified as `tier_2_heavy` (`HIGH` risk, `ENFORCE_BREAK_GLASS`), gated for Break-Glass MFA (`infra/vpc_routing.tf` diff generated).
   - `LIVE-04` (`attach_role_policy` `AdministratorAccess` on `AWSServiceRoleForAccessAnalyzer`): Classified as `tier_2_heavy` (`CRITICAL` risk, `ENFORCE_BREAK_GLASS`), blocked pre-HTTP (`infra/iam.tf` diff generated).
 - **10-Vector Security Self-Audit (`uv run aegis audit`):** `10/10` checks passed in **`0.62 ms`** total wall-clock time (`SEC-01` through `SEC-10`, SHA-256 receipts verified).
+
+### 3.4 Unit Test Suite & Regression Benchmark
+- **Test Count:** 32 / 32 unit tests passing cleanly across `tests/test_cli.py`, `tests/test_dispatcher.py`, and `tests/test_guardrail.py`.
+- **Execution Time:** ~7.35 s total test suite execution time.
+- **Coverage:** Full pre-HTTP Botocore hook interception, prompt injection defense, Unicode/URL evasion, 10-vector security audit, and state rollback engine.

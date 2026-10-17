@@ -1333,7 +1333,21 @@
 
         <div class="section-box">
           <div class="section-head">
-            <span class="section-title">How Aegis-2B Intercepts Boto3 Calls</span>
+            <span class="section-title">Production AWS Cloud Architecture</span>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <button class="btn active" id="btn-arch-drawio" onclick="switchArchImg('drawio')" style="font-size:11px;padding:3px 8px;">AWS Icons (Draw.io)</button>
+              <button class="btn" id="btn-arch-excalidraw" onclick="switchArchImg('excalidraw')" style="font-size:11px;padding:3px 8px;">Whiteboard (Excalidraw)</button>
+              <a href="docs/images/aegis-aws-architecture.drawio.png" target="_blank" class="btn" style="text-decoration:none;font-size:11px;padding:3px 8px;">Full Res</a>
+            </div>
+          </div>
+          <div class="section-body" style="padding:14px;text-align:center;background:#ffffff;">
+            <img id="img-arch-display" src="docs/images/aegis-aws-architecture.drawio.png" alt="Aegis-2B Production AWS Architecture" style="max-width:100%;height:auto;border-radius:6px;border:1px solid var(--border);" onerror="this.onerror=null;this.src='../docs/images/aegis-aws-architecture.drawio.png';" />
+          </div>
+        </div>
+
+        <div class="section-box">
+          <div class="section-head">
+            <span class="section-title">How Aegis-2B Intercepts Boto3 Calls (Live Dynamic Flow)</span>
             <span class="section-meta" id="arch-region-badge" style="font-family:var(--mono);">us-east-1</span>
           </div>
           <div class="section-body" id="arch-svg-container" style="overflow-x:auto;"></div>
@@ -2378,6 +2392,22 @@ ec2 = DeciderCloudGuardrail().protect_boto3_client(boto3.client("ec2"))</pre>
       if (snap.masked_account) return snap.masked_account;
       if (snap.account_label) return snap.account_label.split(' ')[0];
       return 'sandbox';
+    }
+
+    function switchArchImg(mode) {
+      const img = document.getElementById('img-arch-display');
+      const bDraw = document.getElementById('btn-arch-drawio');
+      const bExc = document.getElementById('btn-arch-excalidraw');
+      if (!img) return;
+      if (mode === 'excalidraw') {
+        img.src = 'docs/images/aegis-aws-architecture-exceldraw.png';
+        if (bExc) bExc.classList.add('active');
+        if (bDraw) bDraw.classList.remove('active');
+      } else {
+        img.src = 'docs/images/aegis-aws-architecture.drawio.png';
+        if (bDraw) bDraw.classList.add('active');
+        if (bExc) bExc.classList.remove('active');
+      }
     }
 
     function renderArchitectureDiagram() {

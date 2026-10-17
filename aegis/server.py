@@ -63,6 +63,26 @@ class AegisAPIHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             return
 
+        elif parsed.path.startswith("/docs/images/"):
+            rel_file = parsed.path.replace("/docs/images/", "", 1)
+            target = PROJECT_ROOT / "docs" / "images" / rel_file
+            if target.exists() and target.is_file():
+                self.send_response(HTTPStatus.OK)
+                if target.suffix == ".png":
+                    self.send_header("Content-Type", "image/png")
+                elif target.suffix == ".svg":
+                    self.send_header("Content-Type", "image/svg+xml")
+                elif target.suffix in (".drawio", ".xml"):
+                    self.send_header("Content-Type", "application/xml")
+                elif target.suffix in (".excalidraw", ".json"):
+                    self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(target.stat().st_size))
+                self.end_headers()
+                self.wfile.write(target.read_bytes())
+                return
+            self.send_error(HTTPStatus.NOT_FOUND, "Image not found")
+            return
+
         elif parsed.path == "/api/latest-event":
             self._send_json({
                 "event_id": latest_event_id,
