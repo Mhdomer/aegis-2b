@@ -54,6 +54,68 @@ Aegis-2B solves this by splitting responsibilities into two distinct models:
 
 ---
 
+## The Big Picture: Scanner vs. Agent vs. Circuit Breaker
+
+To understand where Aegis-2B sits in an enterprise security workflow:
+
+```text
+┌─────────────────────────┐       ┌─────────────────────────┐       ┌─────────────────────────┐
+│     1. THE SCANNER      │       │     2. THE AI AGENT     │       │   3. AEGIS-2B AIRBAG    │
+│ (GuardDuty / Prowler /  │ ───►  │ (Bedrock Claude Sonnet  │ ───►  │  (Local Decider 2B in   │
+│    aegis scan --live)   │       │   autonomous planner)   │       │  Botocore pre-HTTP hook)│
+└─────────────────────────┘       └─────────────────────────┘       └─────────────────────────┘
+        Detection                         Intention                          Enforcement
+   "Hey, port 22 is open            "I will plan an API call         "Hold on! Is this action
+   on sg-core, and someone           to fix it... or maybe            safe? 0.016 ms check:
+   sent a poisoned alert."           I delete sg-core by mistake!"    Permit fix, or halt rogue
+                                                                      deletion before AWS API!"
+```
+
+- **1. The Detection Layer (Scanner):** Tools like AWS GuardDuty, Security Hub, Prowler, or `aegis scan --live` detect vulnerabilities: *"Security Group sg-core has world-open port 22."* Scanners do not fix problems.
+- **2. The Cognitive Layer (Autonomous Agent):** Generative models (e.g. Claude 3.5 Sonnet on Amazon Bedrock) ingest alerts and plan remediation tool calls. If the agent hallucinates or gets manipulated by prompt injection, it may attempt a catastrophic mutation like deleting the security group.
+- **3. The Enforcement Layer (Aegis-2B Circuit Breaker):** Intercepts Boto3 *inside the client runtime* before any HTTP packet leaves Python. It normalizes inputs, evaluates blast radius in **0.016 ms**, permits safe surgical fixes autonomously (saving 1,306 tokens), and halts destructive calls in **0.505 ms** with zero packets reaching AWS.
+
+---
+
+## How Anyone Can Test Aegis-2B in 60 Seconds
+
+You can evaluate Aegis-2B through three immediate testing pathways:
+
+### Pathway A: AWS DevOps Engineer (Testing with Live AWS Account)
+Connects directly to your configured AWS credentials (`aws configure` / `~/.aws/credentials`) using **$0.00 free read-only control-plane APIs**:
+
+```bash
+# 1. Scan your live AWS account for open ports, route tables, and IAM roles ($0.00 read-only APIs):
+aegis scan --live
+
+# 2. Run the 3-Tier triage and generate Terraform git diffs to prevent state drift:
+aegis remediate --iac
+
+# 3. Verify that real Boto3 mutations get intercepted pre-HTTP ($0.00 cost):
+aegis test-aws
+```
+
+### Pathway B: Zero-Install Web Operations Center (No AWS Credentials Needed)
+Test the entire circuit breaker directly from any browser:
+1. Open the interactive console: [`mhdomer.github.io/aegis-2b`](https://mhdomer.github.io/aegis-2b/)
+2. Click **Case 1 (Safe Port 22)**: See the fast-lane Tier 0 rule permit in `0.01 ms` with 1,306 tokens saved.
+3. Click **Case 2 (Prompt Injection)**: Watch the circuit breaker turn red and block `delete_security_group`.
+4. Click **Case 3 (VPC Route Table)**: Enter Break-Glass token `849201` to authorize with an immutable SHA-256 audit receipt.
+5. Click **Topology Diagram**: Inspect the live Botocore pre-HTTP boundary.
+
+### Pathway C: Terminal Developer (Zero-Install Ephemeral CLI via `uvx`)
+Run the automated 10-vector red-team self-audit without cloning the repository or configuring Python:
+
+```bash
+# Test 10 live adversarial vectors in 90 milliseconds:
+uvx aegis-2b audit
+
+# Classify alerts and generate Terraform patches instantly:
+uvx aegis-2b remediate --iac
+```
+
+---
+
 ## System Architecture
 
 ![Aegis-2B Production AWS Architecture](docs/images/aegis-aws-architecture.drawio.png)
