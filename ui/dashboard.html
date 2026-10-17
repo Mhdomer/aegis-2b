@@ -1650,13 +1650,13 @@ ec2 = DeciderCloudGuardrail().protect_boto3_client(boto3.client("ec2"))</pre>
     function generateTerraformDiffJs(tool, params) {
       const p = typeof params === 'string' ? (() => { try { return JSON.parse(params); } catch(e){ return {}; } })() : (params || {});
       if (tool === 'revoke_security_group_ingress') {
-        const sg = p.GroupId || 'sg-008c3f4e07a0ff172';
+        const sg = p.GroupId || 'sg-0123456789';
         const port = p.Port || p.FromPort || 22;
         return `--- a/infra/security_groups.tf\n+++ b/infra/security_groups.tf\n@@ -12,7 +12,7 @@ resource "aws_security_group" "${sg.replace(/-/g, '_')}" {\n   ingress {\n     from_port   = ${port}\n     to_port     = ${port}\n     protocol    = "tcp"\n-    cidr_blocks = ["0.0.0.0/0"]\n+    cidr_blocks = ["10.0.0.0/16"] # Restricted by Aegis-2B\n   }\n }`;
       }
       if (tool === 'replace_route') {
-        const rtb = p.RouteTableId || 'rtb-067d049b3b998fcd3';
-        return `--- a/infra/vpc_routing.tf\n+++ b/infra/vpc_routing.tf\n@@ -8,6 +8,6 @@ resource "aws_route" "default_${rtb.replace(/-/g, '_')}" {\n   route_table_id         = "${rtb}"\n   destination_cidr_block = "0.0.0.0/0"\n-  gateway_id             = "igw-06f2b36103b0f5610"\n+  network_interface_id   = "eni-firewall-inspect-01" # Requires MFA approval\n }`;
+        const rtb = p.RouteTableId || 'rtb-0123456789';
+        return `--- a/infra/vpc_routing.tf\n+++ b/infra/vpc_routing.tf\n@@ -8,6 +8,6 @@ resource "aws_route" "default_${rtb.replace(/-/g, '_')}" {\n   route_table_id         = "${rtb}"\n   destination_cidr_block = "0.0.0.0/0"\n-  gateway_id             = "igw-0123456789"\n+  network_interface_id   = "eni-firewall-inspect-01" # Requires MFA approval\n }`;
       }
       if (tool === 'attach_role_policy' || tool.includes('role') || tool.includes('policy')) {
         const role = p.RoleName || 'AWSServiceRoleForAccessAnalyzer';
@@ -1926,7 +1926,16 @@ ec2 = DeciderCloudGuardrail().protect_boto3_client(boto3.client("ec2"))</pre>
             lines.push(`${idStr} ${resStr} ${toolStr} ${tierStr} ${verdStr}`);
           });
           lines.push('\n[Terraform Patch]');
-          lines.push(generateTerraformDiffJs('revoke_security_group_ingress', { GroupId: 'sg-008c3f4e07a0ff172', Port: 22 }));
+          lines.push(generateTerraformDiffJs('revoke_security_group_ingress', { GroupId: 'sg-0123456789', Port: 22 }));
+        } else if (cmd.includes('scan')) {
+          lines.push('aegis-2b v0.2.1 | Cloud Infrastructure Posture Scanner');
+          lines.push('Mode: Offline Sandbox Scan (Connect local daemon or configure AWS for live account)');
+          lines.push('-'.repeat(88));
+          lines.push('Resource Type            Count    Status / Findings');
+          lines.push('-'.repeat(88));
+          lines.push('VPC Security Groups      1        sg-0123456789 (Isolated sandbox fixture)');
+          lines.push('VPC Route Tables         1        rtb-0123456789 (Protected default target)');
+          lines.push('IAM Roles                5        Protected against wildcard privilege escalation');
         } else if (cmd.includes('audit')) {
           const aud = runBrowserSecurityAudit();
           lines.push('aegis-2b v0.2.1 | 10-Vector Security Self-Audit');
@@ -1940,9 +1949,9 @@ ec2 = DeciderCloudGuardrail().protect_boto3_client(boto3.client("ec2"))</pre>
           const r = evaluateInBrowser({ scenario: 'adversarial' });
           lines.push('aegis-2b v0.2.1 | Live AWS Botocore Hook Verification');
           lines.push('-'.repeat(88));
-          lines.push("1. [READ-ONLY PASS]  ec2.describe_security_groups()  -> 1 SG(s) found (sg-008c3f4e07a0ff172) [$0.00]");
-          lines.push("2. [READ-ONLY PASS]  ec2.describe_route_tables()     -> 1 RTB(s) found (rtb-067d049b3b998fcd3) [$0.00]");
-          lines.push("3. [PRE-HTTP BLOCK]  ec2.delete_security_group(GroupId='sg-008c3f4e07a0ff172')");
+          lines.push("1. [READ-ONLY PASS]  ec2.describe_security_groups()  -> 1 SG(s) found (sg-0123456789) [$0.00]");
+          lines.push("2. [READ-ONLY PASS]  ec2.describe_route_tables()     -> 1 RTB(s) found (rtb-0123456789) [$0.00]");
+          lines.push("3. [PRE-HTTP BLOCK]  ec2.delete_security_group(GroupId='sg-0123456789')");
           lines.push(`   -> Stopped by botocore.before-parameter-build in ${r.latency_ms.toFixed(3)} ms`);
           lines.push(`   -> Raised GuardrailBlockedError (${r.reasoning_code}, conf=${r.confidence_percent})`);
         } else if (cmd.includes('compare')) {
