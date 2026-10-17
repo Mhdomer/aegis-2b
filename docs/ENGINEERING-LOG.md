@@ -34,6 +34,14 @@ Aegis-2B solves these by placing a local, non-generative classifier and 3-tier r
 ### Decision 3: Declarative Terraform Patch Mode (`--iac`)
 - Every evaluated `DeciderState` generates a corresponding Terraform HCL `git diff` (`infra/security_groups.tf`, `infra/vpc_routing.tf`, `infra/iam.tf`) via `DeciderCloudGuardrail.generate_terraform_diff(state)` so operators can commit the declarative fix to Git alongside or instead of runtime Boto3 execution.
 
+### Decision 4: In-Process Botocore Interception vs. EventBridge and Lambda Architecture
+- **Context:** Cloud security workflows often route events through Amazon EventBridge to invoke AWS Lambda functions for automated response.
+- **Why EventBridge / Lambda Fails for Agent Guardrails:**
+  1. **Post-Execution Ingestion Delay:** CloudTrail emits events *after* the API call executes. By the time Lambda wakes up, a deleted security group or severed route table has already caused an outage. Lambda is a forensic response mechanism, not an execution circuit breaker.
+  2. **Latency Penalty:** Synchronously proxying agent API calls through an external API Gateway -> Lambda -> Bedrock pipeline introduces a 2,000 ms to 3,500 ms delay per tool check. In contrast, Botocore's in-process `before-parameter-build` hook halts execution in **0.505 ms P50** (427x faster than warm HTTPS).
+  3. **Zero Standing Cloud Spend:** Operating in-process requires no deployed AWS infrastructure, no Lambda execution roles, and $0.00 in cloud costs, allowing the guardrail to run identically on developer laptops, inside CI/CD containers, and in production runtimes.
+- **Role Separation in Defense-in-Depth:** EventBridge remains ideal for upstream ingestion (forwarding GuardDuty ASFF findings to the agent) and downstream notifications (consuming Aegis-2B HMAC-SHA256 audit receipts to alert SecOps), while Aegis-2B acts as the synchronous, pre-network execution gatekeeper.
+
 ---
 
 ## 3. Empirical Benchmark Log (Measured 2026-10-17)
