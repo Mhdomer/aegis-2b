@@ -10,6 +10,13 @@
 
 ![Aegis-2B Banner](https://raw.githubusercontent.com/Mhdomer/aegis-2b/main/docs/images/aegis-article-banner.png)
 
+> ### ⚡ Submission Snapshot & Hackathon Alignment
+> - **Declared Decision Pattern:** Guardrails (`#guardrails`) — Client-side pre-HTTP safety circuit breaker for AWS operations.
+> - **Models Used:** Strands Decider 2B (local ~115ms calibrated safety classifier) paired with Amazon Bedrock (Claude 3.5 Sonnet / Amazon Nova cognitive planners).
+> - **Decision Handled by Decider 2B:** Classifying whether an agent's proposed AWS API write mutation is safe (`PERMIT`), requires human multi-factor authorization (`ENFORCE_BREAK_GLASS`), or contains prompt injection evasion (`QUARANTINE`).
+> - **Reusable Asset:** Standalone pattern with typed Pydantic schema, calibrated question, and SDK hook in [`reusable-patterns/botocore_guardrail_pattern.py`](https://github.com/Mhdomer/aegis-2b/tree/main/reusable-patterns).
+> - **Verified Demonstration:** Under 3 minutes (2m 56s) showing real terminal execution, Bedrock routing, and live prompt injection blocking.
+
 ---
 
 ## 1. The Agentic Cloud Dilemma: When Cloud Ops Agents Meet The Real World
@@ -110,6 +117,13 @@ Decision Rules & Fail-Closed Gate:
   --> Verdict: PERMIT_AUTO_REMEDIATION (Fast-lane Boto3 execution)
 ```
 
+### Handling Ambiguity & Low-Confidence Cases: Fail-Closed Gating
+
+When operating against live cloud accounts, an uncertain permit is an unacceptable risk. If Strands Decider 2B encounters an ambiguous payload, an unparseable structure, or outputs a confidence score below 85% (`Confidence < 0.85`), Aegis-2B **strictly fails closed**:
+- Execution is immediately halted inside the Python runtime before Boto3 serializes the request.
+- The state transitions to `ENFORCE_BREAK_GLASS`, blocking all network transmission to AWS (`0 packets`).
+- An immutable audit receipt is generated, requiring an authenticated human operator with a physical MFA token (`849201` or emergency break-glass string) to review and authorize.
+
 ---
 
 ## Architectural Deep Dive: Why Pre-HTTP SDK Hooks Instead of EventBridge and Lambda?
@@ -203,28 +217,15 @@ def attach_decider_to_session(boto_session, decider_engine):
     boto_session.events.register("before-parameter-build.*", hook)
 ```
 
----
-
-## 5. Next Steps: Extending to Kubernetes and Terraform Pre-Execution Hooks
-
-The SDK-level circuit breaker pattern is not limited to Boto3. The same lightweight, fail-closed classification architecture extends naturally across the cloud-native ecosystem:
-
-1. **Kubernetes API Mutations (Validating Admission Controller):**
-   By embedding Strands Decider 2B inside a Kubernetes `ValidatingAdmissionWebhook` or client-side interceptor (in `client-go` or the Python Kubernetes client), we can inspect mutating admission reviews (`CREATE`, `UPDATE`, `DELETE`) on Pods, Deployments, and ClusterRoleBindings. If an agent attempts to deploy privileged containers (`privileged: true`, `hostNetwork: true`) or bind wildcard ClusterRoles (`*`), Decider 2B returns an immediate rejection in under 1 ms, well within Kubernetes API webhook timeout limits (typically 1 to 3 seconds).
-
-2. **Terraform & OpenTofu Pre-Execution Hooks:**
-   When agents generate Infrastructure-as-Code modifications, Aegis-2B hooks into the CI/CD pipeline before `terraform apply`. By parsing `terraform plan -json`, Decider 2B evaluates the blast radius of planned deletions and replacements. High-blast mutations (such as replacing an Amazon RDS database cluster or modifying VPC Peering connections) automatically trigger `ENFORCE_BREAK_GLASS` in the GitHub Actions / GitLab CI pipeline, preventing out-of-band state destruction.
+> **💡 Note for Agent Framework Builders (Strands InterventionHandler):**  
+> While Aegis-2B demonstrates this pattern at the low-level SDK tier via Botocore events, this exact same typed schema and decision prompt drops seamlessly into a **Strands `InterventionHandler`** or any agent tool pre-execution hook (such as LangChain or LlamaIndex). In a Strands agent, Decider 2B intercepts the planned tool call before invocation, providing identical sub-millisecond fail-closed guarantees before any action reaches execution.
 
 ---
 
-## Live Demonstration Video (Under 3 Minutes)
+## 5. Live Demonstration Video & Tri-Vector Incident Walkthrough
 
 > 📺 **Watch the Live Demo (2m 56s):** [https://youtu.be/xdTGxZNst0M](https://youtu.be/xdTGxZNst0M)  
 > Demonstrates a live 50/50 split of the CachyOS terminal and Web Operations Center: Tier 0 Boto3 remediation, prompt injection defense, and break-glass MFA token verification.
-
----
-
-## Tri-Vector Security Walkthrough: 3 Real Incidents
 
 We tested Aegis-2B against both our ASFF finding fixtures (`scenarios/fixtures/*.json`) and our live AWS account (`3273****1586`, `us-east-1`) using $0.00 read-only discovery + pre-HTTP mutation interception (`aegis test-aws` and `aegis remediate --iac`):
 
@@ -256,7 +257,7 @@ We tested Aegis-2B against both our ASFF finding fixtures (`scenarios/fixtures/*
 
 ---
 
-## 5 Engineering Battles & Solutions
+## 6. 5 Engineering Battles & Solutions
 
 1. **The Pre-HTTP Interception Paradox:** Asking an LLM to police its own tool calls via system prompts leaves you exposed to prompt injection. Registering the classifier inside Botocore's `before-parameter-build` event loop guarantees that even if a planner is completely compromised, no destructive HTTP request can ever be serialized or signed.
 2. **Sub-Millisecond Classification vs. LLM Latency:** Frontier LLMs take 1.8 to 2.5 seconds to reason over safety. By distilling safety evaluation into a calibrated 5-head classification model (Strands Decider 2B), evaluation completes in **0.034 ms**, dropping execution latency by thousands of times compared to AWS HTTPS control-plane roundtrips.
@@ -266,7 +267,19 @@ We tested Aegis-2B against both our ASFF finding fixtures (`scenarios/fixtures/*
 
 ---
 
-## Try It Yourself (Zero Local Installation Needed)
+## 7. Future Horizons: Extending to Kubernetes and Terraform Pre-Execution Hooks
+
+The SDK-level circuit breaker pattern is not limited to Boto3. The same lightweight, fail-closed classification architecture extends naturally across the cloud-native ecosystem:
+
+1. **Kubernetes API Mutations (Validating Admission Controller):**
+   By embedding Strands Decider 2B inside a Kubernetes `ValidatingAdmissionWebhook` or client-side interceptor (in `client-go` or the Python Kubernetes client), we can inspect mutating admission reviews (`CREATE`, `UPDATE`, `DELETE`) on Pods, Deployments, and ClusterRoleBindings. If an agent attempts to deploy privileged containers (`privileged: true`, `hostNetwork: true`) or bind wildcard ClusterRoles (`*`), Decider 2B returns an immediate rejection in under 1 ms, well within Kubernetes API webhook timeout limits (typically 1 to 3 seconds).
+
+2. **Terraform & OpenTofu Pre-Execution Hooks:**
+   When agents generate Infrastructure-as-Code modifications, Aegis-2B hooks into the CI/CD pipeline before `terraform apply`. By parsing `terraform plan -json`, Decider 2B evaluates the blast radius of planned deletions and replacements. High-blast mutations (such as replacing an Amazon RDS database cluster or modifying VPC Peering connections) automatically trigger `ENFORCE_BREAK_GLASS` in the GitHub Actions / GitLab CI pipeline, preventing out-of-band state destruction.
+
+---
+
+## 8. Try It Yourself (Zero Local Installation Needed)
 
 ![Aegis-2B Web Operations Center](https://raw.githubusercontent.com/Mhdomer/aegis-2b/main/docs/images/aegis-web-dashboard.png)
 *(Figure 3: Monochromatic Web Operations Center showing real-time telemetry, embedded terminal emulator, live AWS posture scanner, and cryptographic audit receipts)*
