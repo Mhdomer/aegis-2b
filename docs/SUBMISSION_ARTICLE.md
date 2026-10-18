@@ -8,6 +8,8 @@
 **Interactive Colab Notebook:** [Open in Google Colab](https://colab.research.google.com/github/Mhdomer/aegis-2b/blob/main/notebooks/aegis_2b_walkthrough.ipynb)  
 **Full Blog Post:** [https://mhdomer.github.io/posts/Sub-Second-Guardrails-Using-Strands-Decider-2B-as-a-Safety-Circuit-Breaker-for-Autonomous-Cloud-Ops/](https://mhdomer.github.io/posts/Sub-Second-Guardrails-Using-Strands-Decider-2B-as-a-Safety-Circuit-Breaker-for-Autonomous-Cloud-Ops/)
 
+![Aegis-2B Banner](https://raw.githubusercontent.com/Mhdomer/aegis-2b/main/docs/images/aegis-article-banner.png)
+
 ---
 
 ## 1. The Agentic Cloud Dilemma: When Cloud Ops Agents Meet The Real World
