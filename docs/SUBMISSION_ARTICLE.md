@@ -10,12 +10,15 @@
 
 ![Aegis-2B Banner](https://raw.githubusercontent.com/Mhdomer/aegis-2b/main/docs/images/aegis-article-banner.png)
 
-> ### ⚡ Submission Snapshot & Hackathon Alignment
-> - **Declared Decision Pattern:** Guardrails (`#guardrails`) — Client-side pre-HTTP safety circuit breaker for AWS operations.
-> - **Models Used:** Strands Decider 2B (local ~115ms calibrated safety classifier) paired with Amazon Bedrock (Claude 3.5 Sonnet / Amazon Nova cognitive planners).
-> - **Decision Handled by Decider 2B:** Classifying whether an agent's proposed AWS API write mutation is safe (`PERMIT`), requires human multi-factor authorization (`ENFORCE_BREAK_GLASS`), or contains prompt injection evasion (`QUARANTINE`).
-> - **Reusable Asset:** Standalone pattern with typed Pydantic schema, calibrated question, and SDK hook in [`reusable-patterns/botocore_guardrail_pattern.py`](https://github.com/Mhdomer/aegis-2b/tree/main/reusable-patterns).
-> - **Verified Demonstration:** Under 3 minutes (2m 56s) showing real terminal execution, Bedrock routing, and live prompt injection blocking.
+### ⚡ Submission Snapshot & Hackathon Alignment
+
+| Requirement | Implementation Detail |
+| :--- | :--- |
+| **Declared Decision Pattern** | **Guardrails (`#guardrails`)** — Client-side pre-HTTP safety circuit breaker |
+| **Models Used** | **Strands Decider 2B** (~115ms local classifier) + **Amazon Bedrock** (Claude 3.5 Sonnet / Amazon Nova) |
+| **Decision Handled** | Classifying AWS write mutations (`PERMIT`, `ENFORCE_BREAK_GLASS`, `QUARANTINE`) pre-HTTP |
+| **Reusable Asset** | [`reusable-patterns/botocore_guardrail_pattern.py`](https://github.com/Mhdomer/aegis-2b/tree/main/reusable-patterns) |
+| **Verified Demo Video** | [2m 56s Live Video Walkthrough](https://youtu.be/xdTGxZNst0M) (Under 3-minute limit) |
 
 ---
 
@@ -217,8 +220,7 @@ def attach_decider_to_session(boto_session, decider_engine):
     boto_session.events.register("before-parameter-build.*", hook)
 ```
 
-> **💡 Note for Agent Framework Builders (Strands InterventionHandler):**  
-> While Aegis-2B demonstrates this pattern at the low-level SDK tier via Botocore events, this exact same typed schema and decision prompt drops seamlessly into a **Strands `InterventionHandler`** or any agent tool pre-execution hook (such as LangChain or LlamaIndex). In a Strands agent, Decider 2B intercepts the planned tool call before invocation, providing identical sub-millisecond fail-closed guarantees before any action reaches execution.
+> **💡 Note for Agent Framework Builders (Strands InterventionHandler):** While Aegis-2B demonstrates this pattern at the low-level SDK tier via Botocore events, this exact same typed schema and decision prompt drops seamlessly into a **Strands `InterventionHandler`** or any agent tool pre-execution hook (such as LangChain or LlamaIndex). In a Strands agent, Decider 2B intercepts the planned tool call before invocation, providing identical sub-millisecond fail-closed guarantees before any action reaches execution.
 
 ---
 
