@@ -14,7 +14,7 @@
   <a href="https://codespaces.new/Mhdomer/aegis-2b"><img src="https://img.shields.io/badge/GitHub_Codespaces-Run_Real_CLI_in_Browser-0f172a?style=flat-square&logo=github" alt="Open in GitHub Codespaces" /></a>
   <a href="https://github.com/Mhdomer/aegis-2b/actions/workflows/ci.yml"><img src="https://github.com/Mhdomer/aegis-2b/actions/workflows/ci.yml/badge.svg" alt="CI & SAST Security Audit" /></a>
   <a href="https://pypi.org/project/aegis-2b/"><img src="https://img.shields.io/pypi/v/aegis-2b.svg?color=15803d&style=flat-square" alt="PyPI version" /></a>
-  <a href="https://github.com/Mhdomer/aegis-2b/releases/tag/v0.2.1"><img src="https://img.shields.io/badge/release-v0.2.1_(Official_Package)-15803d?style=flat-square" alt="Release v0.2.1" /></a>
+  <a href="https://github.com/Mhdomer/aegis-2b/releases/tag/v0.3.0"><img src="https://img.shields.io/badge/release-v0.3.0_(Official_Package)-15803d?style=flat-square" alt="Release v0.3.0" /></a>
 </p>
 
 <p align="center">
@@ -206,7 +206,7 @@ aegis rollback <receipt-hash> --token BG-SEC-911
 | **PyPI Package** | `pip install aegis-2b` | Official package on PyPI |
 | **Isolated CLI** | `uvx aegis-2b audit` | Ephemeral zero-install virtualenv |
 | **OCI Container** | `docker run --rm ghcr.io/mhdomer/aegis-2b:latest audit` | Multi-arch container (`amd64`, `arm64`) for CI/CD |
-| **Debian / Ubuntu** | `sudo apt install ./aegis-2b_0.2.1_all.deb` | Official signed release asset |
+| **Debian / Ubuntu** | `sudo apt install ./aegis-2b_0.3.0_all.deb` | Official signed release asset |
 | **Homebrew** | `brew install Mhdomer/tap/aegis` | macOS and Linux |
 
 ### Docker CI/CD Integration Example:

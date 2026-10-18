@@ -13,7 +13,7 @@ from patterns.guardrails import (
     load_policy_as_code,
 )
 
-__version__ = "0.2.1"
+__version__ = "0.3.0"
 
 __all__ = [
     "__version__",

@@ -1,6 +1,6 @@
 [project]
 name = "aegis-2b"
-version = "0.2.1"
+version = "0.3.0"
 description = "Sub-Second Safety Circuit Breaker for Autonomous Cloud Ops Agents using Strands Decider 2B & Amazon Bedrock"
 readme = "README.md"
 license = { text = "MIT" }

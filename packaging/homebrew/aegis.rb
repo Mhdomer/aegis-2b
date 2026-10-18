@@ -3,7 +3,7 @@ class Aegis < Formula
 
   desc "Autonomous Cloud Ops Safety Circuit Breaker using Strands Decider 2B"
   homepage "https://mhdomer.github.io/aegis-2b/"
-  url "https://github.com/Mhdomer/aegis-2b/archive/refs/tags/v0.2.1.tar.gz"
+  url "https://github.com/Mhdomer/aegis-2b/archive/refs/tags/v0.3.0.tar.gz"
   license "MIT"
 
   depends_on "python@3.12"
